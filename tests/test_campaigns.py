@@ -20,11 +20,14 @@ class MyTestCase(unittest.TestCase):
         db = init_db()
         new_campaign = campaign(desc="Test Campaign")
         db.add(new_campaign)
+        db.commit()
         request = db.query(campaign).filter_by(desc="Test Campaign").first()
+        print request.desc
         self.assertTrue(request.desc == new_campaign.desc)
     def test_campaign_types(self):
         db = init_db()
         for obj in db.query(campaign_type).order_by(campaign_type.id):
+            print obj.desc
             self.assertTrue(obj.desc in types)
 if __name__ == '__main__':
     unittest.main()

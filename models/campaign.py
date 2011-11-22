@@ -36,7 +36,7 @@ def init_db(transactional=False):
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    if(session.query(campaign_type).count <=0):
+    if(session.query(campaign_type).count() <=0):
         for temp in types:
             session.add(campaign_type(desc=temp))
     session.commit()
