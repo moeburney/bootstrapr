@@ -3,7 +3,7 @@ from base import Base
 from dbutils import engine
 import dbutils
 from campaign import init_db
-from models.campaign import campaign
+from models.campaign import campaign, campaign_type, types
 from sqlalchemy.engine import create_engine
 from sqlalchemy.orm.session import sessionmaker
 from utils.dbutils import Session
@@ -22,5 +22,9 @@ class MyTestCase(unittest.TestCase):
         db.add(new_campaign)
         request = db.query(campaign).filter_by(desc="Test Campaign").first()
         self.assertTrue(request.desc == new_campaign.desc)
+    def test_campaign_types(self):
+        db = init_db()
+        for obj in db.query(campaign_type).order_by(campaign_type.id):
+            self.assertTrue(obj.desc in types)
 if __name__ == '__main__':
     unittest.main()
