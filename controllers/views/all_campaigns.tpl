@@ -2,10 +2,13 @@
 <html>
 <head>
 <title>{{items[0].desc}}</title>
+      <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css">
+
 </head>
 %import datetime
 <body>
-</body>
+
 <table border="1">
 <thead> <tr><th>Name</th><th>Money Spent</th><th>Revenue</th><th>Conversions</th><th>Profit</th><th>Return on Investment</th><th>Start Date</th><th>End Date</th><th>Time Spent</th><th>Type</th><th>Goals</th><th>Custom Attributes</th> </tr></thead>
 <tfoot>
@@ -19,4 +22,8 @@
 </tfoot>
 </table>
 <a href="/campaigns/new.html">Create New Campaign</a>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+  <script> $( "input:submit, a, button,input:reset").button(); </script>
+</body>
 </html>

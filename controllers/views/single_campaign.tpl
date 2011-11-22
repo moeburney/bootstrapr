@@ -2,6 +2,9 @@
 <html>
 <head>
 <title>{{item.desc}}</title>
+      <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css">
+
 </head>
 %import datetime
 <body>
@@ -37,6 +40,10 @@
 <input type="submit" value="Update"></input>   <input type="reset" value="Reset"></input><br>
 </form>
 <a href="/campaigns">HOME</a>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+  <script> $( "input:submit, a, button,input:reset").button(); </script>
+
 </body>
 
 </html>
