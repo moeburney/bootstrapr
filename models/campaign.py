@@ -1,5 +1,6 @@
 from models.base import Base
 import datetime
+import uuid
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
@@ -13,6 +14,7 @@ types = ['Google Adwords', 'Cold Email', 'Cold Call', 'Blog', 'Media', 'Forum ac
 class campaign(Base):
     __tablename__ = "campaigns"
     id = Column(Integer,primary_key=True,autoincrement=True,unique=True)
+    uuid = Column(String(30),default=uuid.uuid4().__str__())
     desc = Column(String(200),default="New Campaign")
     cash_spent = Column(Float,default=0.0,unique=True)
     time_spent = Column(BigInteger)
@@ -31,6 +33,7 @@ class campaign_type(Base):
     id = Column(Integer,primary_key=True,autoincrement=True,unique=True)
     desc = Column(String(200),default="Default Type")
     details = Column(String(1000)) # a json describing extra attributes of this campaign type
+    
 def init_db(transactional=False):
     engine = create_engine("mysql://rohan:gotohome@localhost/ron")
     Base.metadata.create_all(engine)
@@ -39,7 +42,8 @@ def init_db(transactional=False):
     if(session.query(campaign_type).count() <=0):
         for temp in types:
             session.add(campaign_type(desc=temp))
-    session.commit()
+        session.commit()
+
     return session
 
 
