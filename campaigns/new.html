@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Add Campaign</title>
+      <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css">
 </head>
 <body>
-<form action="/campaigns" method="POST">
+<button id="addData">Add Custom Data</button>
+<form id="cform" action="/campaigns" method="POST">
     <input type="text" id="desc" name="desc" placeholder="Name of Campaign" required/><br/>
     <input type="number" id="time_spent" name="time_spent" placeholder="Hrs spent on Campaign"/><br/>
     <input type="number" id="cash_spent" name="cash_spent" placeholder="Money Spent on Campaign"/><br/>
@@ -14,6 +17,7 @@
     <input type=number id="roi" name="roi" placeholder="Return on Investment"/><br/>
     <input type=date id="sts" name="sts" placeholder="Campaign Start DateTime"/><br/>
     <input type=date id="ets" name="ets" placeholder="Campaign End DateTime"/><br/>
+    <input type=hidden id="attrs" name="attrs"/>
     <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
         <option value="Google Adwords">Google Adwords</option>
         <option value="Cold Email">Cold Email</option>
@@ -27,9 +31,61 @@
         <option value="Facebook">Facebook</option>
       </select><br><br>
         <input type=text id="goal" name="goal" placeholder="Goals of Campaign"/><br/>
-    <input type="submit" value="Create Campaign"/> <input type="reset" value="Clear"/><br/>
+    <input type="submit" id="submit" value="Create Campaign"/> <input type="reset" value="Clear"/><br/>
     </form>
 </form>
+<div id="dialog-form" title="Create new data">
+	<form>
+	<fieldset>
+        <label for="name">Name: </label>
+		<input required type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" placeholder="Name"/>
+         <select required id="dtype" name="dtype">
+        <option value="Text">Text</option>
+        <option value="Number">Number</option>
+        <option value="Date">Date</option>
+        <option value="Email">Email</option>
+    <option value="url">url</option></select>
+    </fieldset>
+
+	</form>
+</div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script src="https://raw.github.com/maxatwork/form2js/master/src/form2js.js"></script>
+<script type="text/javascript"> $(function() {
+        
+		$( "input:submit, a, button,input:reset").button();
+		$( "#addData" ).click(function() { $( "#dialog-form" ).dialog( "open" ) });
+        $("#cform").submit(function(event){
+            var attrs = {}
+            $("input[id^=custom-]").each(function(item,value){
+               attrs[$(value).attr('placeholder')] = $(value).val()
+            })
+            var stringi = JSON.stringify(attrs)
+            $('#attrs').val(stringi)
+           
+                return true;
+        })
+
+	$( "#dialog-form" ).dialog({
+			autoOpen: false,
+			height: 300,
+			width: 350,
+			modal: true,
+			buttons: {
+				"Create custom data": function() {
+				$("#submit").before("<input value='' id=custom-"+$("#name").val()+" required placeholder="+$("#name").val()+" type="+$("#dtype").val()+"/><br/>");
+                 $( this ).dialog( "close" );
+				},
+				Cancel: function() {
+					$( this ).dialog( "close" );
+				},
+                close: function(){$(this).dialog("close")}
+			}
+
+		});
+	});
+</script>
 </body>
 </html>
 

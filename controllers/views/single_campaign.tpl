@@ -29,9 +29,9 @@
 %else:
 <label for="goal">Goal: </label><input type=text id="goal" name="goal" value=0></input><br>
 %end
-%if uattrs["empty"] is not True:
+%if uattrs:
 %for attr,val in uattrs.iteritems():
-<label for="{{attr}}">{{attr}}</label> <input type=text id="{{attr}}" name="{{attr}}" value="{{val}}"></input><br>
+<label for="{{attr}}">{{attr}}: </label> <input type=text id="{{attr}}" name="{{attr}}" value="{{val}}"></input><br>
 %end
 %end
 <input type="submit" value="Update"></input>   <input type="reset" value="Reset"></input><br>
