@@ -59,8 +59,10 @@ class campaign(Base):
         db.add(self)
         db.commit()
         return self
-        
-
+    def delete(self):
+        db = init_db()
+        db.delete(self)
+        db.commit()
 
 class campaign_type(Base):
     __tablename__ = "campaign_types"

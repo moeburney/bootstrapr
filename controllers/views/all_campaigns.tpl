@@ -17,7 +17,8 @@
 <td>{{x.conversions}}</td><td>{{x.profit}}</td><td>{{x.roi}}</td>
 <td>{{datetime.datetime.fromtimestamp(x.startTs)}}</td><td>{{datetime.datetime.fromtimestamp(x.endTs)}}</td>
 <td>{{x.time_str}}</td><td>{{x.campaign_desc}}</td><td>{{x.goal}}</td><td>{{x.attrs}}</td>
-<td><a href={{"/campaigns/"+str(x.id)}}>Edit</a></td></tr>
+<td><a href={{"/campaigns/"+str(x.id)}}>Edit</a></td>
+<td><a href={{"/campaigns/"+str(x.id)+"/destroy"}}>Delete</a></td></tr>
 %end
 </tfoot>
 </table>
