@@ -17,11 +17,11 @@
 <label for="sts">Start Time:</label> <input type=text id="sts" name="sts" value="{{datetime.datetime.fromtimestamp(item.startTs)}}"></input><br>
 <label for="ets">End Time:</label> <input type=text id="ets" name="ets" value="{{datetime.datetime.fromtimestamp(item.endTs)}}"></input><br>
 <label for="ctype">Campaign type</label> <select id="ctype" name="ctype"><br>
-%if main_ctype is not None:
-  <option value="{{main_ctype.desc}}">{{main_ctype.desc}}</option><br>
+%if item.campaign_type != 0:
+  <option value="{{item.campaign_type}}">{{item.campaign_desc}}</option><br>
 %end
 %for x in ctypes:
-  <option value="{{x.desc}}">{{x.desc}}</option>
+  <option value="{{x.id}}">{{x.desc}}</option>
 %end
 </select><br>
 %if item.goal is not None:

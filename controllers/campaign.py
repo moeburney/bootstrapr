@@ -8,10 +8,10 @@ __author__ = 'rohan'
 from bottle import route, run, request, get, post,view
 bottle.debug(True)
 @get('/campaigns')
+@view('all_campaigns')
 def handler():
-    db = init_db()
     objs = get_all()
-    return objs[0].desc
+    return dict(items = objs)
 
 @get('/campaigns/:ide')
 @view('single_campaign')
@@ -20,18 +20,13 @@ def handler(ide):
     if(obj is None):
         bottle.redirect('/')
     print obj.desc
-    main_campaign_type = campaign_type_get_one(obj.campaign_type)
     types = campaign_type_get_all(exclude=obj.campaign_type)
-    attrs = json.loads(obj.attrs)
-    return dict(item=obj,attrs=json.loads(obj.attrs),ctypes=types,main_ctype=main_campaign_type,uattrs=attrs)
+    return dict(item=obj,attrs=json.loads(obj.attrs),ctypes=types,uattrs=json.loads(obj.attrs))
 
 @post('/campaigns')
 def handler():
-    db = init_db()
-    temp_camp = campaign(desc=request.POST("desc"),startTs=request.POST('sts'),endTs=request.POST("ets"),campaign_type=request.POST('ctype'))
-    db.add(temp_camp)
-    db.commit()
-    bottle.redirect('/campaigns/'+temp_camp.id)
+    obj = campaign().update(request.POST)
+    bottle.redirect('/campaigns/'+obj.id)
 
 @post('/campaigns/:ide')
 def handler(ide):

@@ -4,6 +4,7 @@ import datetime
 import uuid
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql.expression import and_
 
@@ -30,7 +31,12 @@ class campaign(Base):
     campaign_type = Column(Integer)
     goal = Column(Integer)
     attrs = Column(String(1000),default=json.dumps({"empty":True})) # a json for all other unique attributes
-
+    @hybrid_property
+    def campaign_desc(self):
+        obj = campaign_type_get_one(self.campaign_type)
+        if(obj is not None):
+            return obj.desc
+        return None
     def update(self,params):
         self.id = params.get('id') if params.get("id") is not None else self.id
         self.uuid = params.get('uuid') if params.get("uuid") is not None else self.uuid
@@ -50,7 +56,7 @@ class campaign(Base):
         db = init_db()
         db.add(self)
         db.commit()
-
+        return self
         
 
 
