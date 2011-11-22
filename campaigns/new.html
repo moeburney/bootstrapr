@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<form action="/campaigns" method="POST">
+    <input type="text" id="desc" name="desc" placeholder="Name of Campaign" required/><br/>
+    <input type="number" id="time_spent" name="time_spent" placeholder="Hrs spent on Campaign"/><br/>
+    <input type="number" id="cash_spent" name="cash_spent" placeholder="Money Spent on Campaign"/><br/>
+    <input type=number id="revenue" name="revenue" placeholder="Revenue"/><br/>
+    <input type=number id="conversions" name="conversions" placeholder="Number of Conversions"/><br/>
+    <input type=number id="profit" name="profit" placeholder="Profits Earned"/><br/>
+    <input type=number id="roi" name="roi" placeholder="Return on Investment"/><br/>
+    <input type=date id="sts" name="sts" placeholder="Campaign Start DateTime"/><br/>
+    <input type=date id="ets" name="ets" placeholder="Campaign End DateTime"/><br/>
+    <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
+        <option value="Google Adwords">Google Adwords</option>
+        <option value="Cold Email">Cold Email</option>
+        <option value="Cold Call">Cold Call</option>
+        <option value="Blog">Blog</option>
+        <option value="Media">Media</option>
+        <option value="Forum activity">Forum activity</option>
+        <option value="Twitter">Twitter</option>
+        <option value="White paper">White paper</option>
+        <option value="Ebook">Ebook</option>
+        <option value="Facebook">Facebook</option>
+      </select><br><br>
+        <input type=text id="goal" name="goal" placeholder="Goals of Campaign"/><br/>
+    <input type="submit" value="Create Campaign"/> <input type="reset" value="Clear"/><br/>
+    </form>
+</form>
+</body>
+</html>
+
+

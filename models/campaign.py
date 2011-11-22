@@ -24,13 +24,15 @@ class campaign(Base):
     conversions = Column(Integer,default=0)
     profit  = Column(Float,default=0.0)
     roi  = Column(Float,default=0.0)
-    startTs = Column(BigInteger,default=int(datetime.datetime.now().strftime("%s")))
+    startTs = Column(BigInteger,default=0)
     endTs =     Column(BigInteger,default=0)
-    time_spent = Column(BigInteger,default=0)
-
+    time_spent = Column(Integer,default=0)  # store time in number of minutes , convert to hours at view
     campaign_type = Column(Integer)
     goal = Column(Integer)
     attrs = Column(String(1000),default=json.dumps({"empty":True})) # a json for all other unique attributes
+    @hybrid_property
+    def time_str(self):
+        return "less than a hour" if (self.time_spent <= 1 or self.time_spent==0) else str(self.time_spent) + " hrs"
     @hybrid_property
     def campaign_desc(self):
         obj = campaign_type_get_one(self.campaign_type)

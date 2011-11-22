@@ -2,7 +2,7 @@ import json
 import bottle
 from sqlalchemy.sql.expression import and_
 from models import campaign
-from models.campaign import init_db, get_all, get_one, campaign_type_get_all, campaign_type_get_one
+from models.campaign import init_db, get_all, get_one, campaign_type_get_all, campaign
 
 __author__ = 'rohan'
 from bottle import route, run, request, get, post,view
@@ -25,8 +25,11 @@ def handler(ide):
 
 @post('/campaigns')
 def handler():
-    obj = campaign().update(request.POST)
-    bottle.redirect('/campaigns/'+obj.id)
+    obj = campaign()
+    obj.update(request.POST)
+    if(obj is None):
+        return "error"
+    bottle.redirect('/campaigns/'+str(obj.id))
 
 @post('/campaigns/:ide')
 def handler(ide):
