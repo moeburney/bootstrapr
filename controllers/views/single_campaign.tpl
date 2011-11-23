@@ -39,7 +39,7 @@
 %end
 <input type="submit" value="Update"></input>   <input type="reset" value="Reset"></input><br>
 </form>
-<a href="/campaigns">HOME</a>
+<a href="/campaigns">HOME</a><a href="/campaigns/logout">Logout</a>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
   <script> $( "input:submit, a, button,input:reset").button(); </script>
