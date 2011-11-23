@@ -1,8 +1,6 @@
 import json
 import bottle
-from sqlalchemy.sql.expression import and_
-from models import campaign
-from models.campaign import init_db, get_all, get_one, campaign_type_get_all, campaign
+from models.campaign import get_all, get_one, campaign_type_get_all, campaign
 
 __author__ = 'rohan'
 from bottle import route, run, request, get, post,view
