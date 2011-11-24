@@ -4,6 +4,7 @@
 <title>{{items[0].desc}}</title>
       <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="../../campaigns/css/base.css" />
 
 </head>
 %import datetime
@@ -14,7 +15,7 @@
 <tfoot>
 %for x in items:
 <tr><td>{{x.desc}}</td><td>{{x.roi}}</td>
-<td>{{datetime.datetime.fromtimestamp(x.startTs)}}</td><td>{{datetime.datetime.fromtimestamp(x.endTs)}}</td>
+<td>{{datetime.datetime.fromtimestamp(x.startTs/1000)}}</td><td>{{datetime.datetime.fromtimestamp(x.endTs/1000)}}</td>
 <td>{{x.campaign_desc}}</td><td>{{x.attrs}}</td>
 <td><a href="{{'/campaigns/'+str(x.id)}}">Edit</a></td>
 <td><a class="delete" href="{{'/campaigns/'+str(x.id)+'/destroy'}}">Delete</a></td></tr>

@@ -4,10 +4,12 @@
     <title>Add Campaign</title>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="../../campaigns/css/base.css" />
+
 </head>
 <body>
 %import datetime
-<form id="cform" action="/campaigns" method="POST">
+<form id="cform" action="/campaigns/{{item.id}}" method="POST">
     <h3>General: </h3>
     <input type=hidden id="uuid" name="uuid" value="{{item.uuid}}" />
     <input type="text" id="desc" name="desc" placeholder="Name of Campaign" value="{{item.desc}}" required/><br/><br/>
@@ -25,8 +27,10 @@
     %else:
     <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value=0 /><br>
     %end
-    <input type=date id="sts" name="sts" placeholder="Campaign Start DateTime" value="{{datetime.datetime.fromtimestamp(item.startTs)}}" /><br/>
-    <input type=date id="ets" name="ets" placeholder="Campaign End DateTime" value="{{datetime.datetime.fromtimestamp(item.endTs)}}" /><br/>
+      <label for="datepick">Start Date: </label> <input type="text" id='datepick'><br/>
+    <label for="datepick1">End Date: </label> <input type="text" id='datepick1' placeholder="End date"/>
+    <input type='hidden' id="sts" name="sts" value="{{item.startTs}}"/><br/>
+    <input type='hidden' id="ets" name="ets" value="{{item.endTs}}"/><br/>
     <hr>
     <h3>Expenses: </h3>
     <input type="hidden" id="expenses" name="expenses"/>
@@ -121,6 +125,24 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script type="text/javascript"> $(function() {
+
+$( "#datepick" ).datepicker({
+			altField: "#sts",
+			altFormat: "@",
+            dateFormat : "dd-mm-yy"
+
+		});
+    $("#datepick").datepicker("setDate",new Date((Number($("#sts").val()))))
+	$( "#datepick1" ).datepicker({
+			altField: "#ets",
+			altFormat: "@",
+            dateFormat : "dd-mm-yy"
+
+		});
+
+    $("#datepick1").datepicker("setDate",new Date((Number($("#ets").val()))))
+
+
     var expenselist = 0
     $("#removeexpense").click(function() {
         $("#expenselist").empty()
@@ -216,12 +238,11 @@
         $("#dialog-form").dialog("open")
     });
     $("#cform").submit(function(event) {
-        event.preventDefault()
         collectCustomData()
         collectGainsData()
         collectExpenseData()
 
-        return false;
+        return true;
     })
     var collectCustomData = function(){
           var attrs = {}

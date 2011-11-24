@@ -4,6 +4,8 @@
     <title>Add Campaign</title>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="../../campaigns/css/base.css" />
+
 </head>
 <body>
 <form id="cform" action="/campaigns" method="POST">
@@ -16,8 +18,10 @@
 </select><br>
     <br>
     <input type=text id="goal" name="goal" placeholder="Goals of Campaign"/><br/>
-    <input type=date id="sts" name="sts" placeholder="Campaign Start DateTime"/><br/>
-    <input type=date id="ets" name="ets" placeholder="Campaign End DateTime"/><br/>
+    <input type="text" id='datepick' placeholder="Start date"><br/>
+    <input type="text" id='datepick1' placeholder="End date">
+    <input type='hidden' id="sts" name="sts" /><br/>
+    <input type='hidden' id="ets" name="ets" /><br/>
     <hr>
     <h3>Expenses: </h3>
     <input type="hidden" id="expenses" name="expenses"/>
@@ -76,6 +80,18 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script type="text/javascript"> $(function() {
+
+		$( "#datepick" ).datepicker({
+			altField: "#sts",
+			altFormat: "@"
+            
+		});
+	$( "#datepick1" ).datepicker({
+			altField: "#ets",
+			altFormat: "@"
+		});
+
+
     var expenselist = 0
     $("#removeexpense").click(function() {
         $("#expenselist").empty()
