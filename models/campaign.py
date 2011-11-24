@@ -12,27 +12,41 @@ __author__ = 'rohan'
 from sqlalchemy import Column, Integer,String,Float,BigInteger
 
 Base = declarative_base()
-types = ['Google Adwords', 'Cold Email', 'Cold Call', 'Blog', 'Media', 'Forum activity', 'Twitter', 'White paper', 'Ebook','Facebook']
+ctypes = ['Google Adwords', 'Cold Email', 'Cold Call', 'Blog', 'Media', 'Forum activity', 'Twitter', 'White paper', 'Ebook','Facebook']
+gaintypes = ['Conversions','Mailing List Subscriptions','Sales','Views','Interactions','Revenue']
+expensetypes = ['Hours Spent','Money Spent']
+status = ['Finished','Pending','Ongoing']
+STATUS_FINISHED=0
+STATUS_PENDING=1
+STATUS_ONGOING=2
+CASH=1
+TIME=0
+CONVERSIONS=0
+MAILSUBS=1
+SALES=2
+VIEWS=3
+INTERACTIONS=4
+REVENUE=5
+
+
 
 class campaign(Base):
     __tablename__ = "campaigns"
     id = Column(Integer,primary_key=True,autoincrement=True,unique=True)
     uuid = Column(String(100),default=uuid.uuid4().__str__())
     desc = Column(String(200),default="New Campaign")
-    cash_spent = Column(Float,default=0.0)
-    revenue = Column(Float,default=0.0)
-    conversions = Column(Integer,default=0)
-    profit  = Column(Float,default=0.0)
-    roi  = Column(Float,default=0.0)
+    gains = Column(String(1000)) #store gain types and their monetary weights
     startTs = Column(BigInteger,default=0)
     endTs =     Column(BigInteger,default=0)
-    time_spent = Column(Integer,default=0)  # store time in number of minutes , convert to hours at view
     campaign_type = Column(Integer)
     goal = Column(Integer)
+    roi = Column(Integer,default=0)
+    rank = Column(Integer,default=0)
+    expense = Column(String(500))
     attrs = Column(String(1000),default=json.dumps({"empty":True})) # a json for all other unique attributes
-    @hybrid_property
-    def time_str(self):
-        return "less than a hour" if (self.time_spent <= 1 or self.time_spent==0) else str(self.time_spent) + " hrs"
+    notes = Column(String(1000))
+    status = Column(Integer,default=STATUS_PENDING)
+    
     @hybrid_property
     def campaign_desc(self):
         obj = campaign_type_get_one(self.campaign_type)
@@ -43,22 +57,26 @@ class campaign(Base):
         self.id = params.get('id') if params.get("id") is not None else self.id
         self.uuid = params.get('uuid') if params.get("uuid") is not None else self.uuid
         self.desc = params.get('desc') if params.get("desc") is not None else self.desc
-        self.cash_spent = params.get('cash_spent') if params.get("cash_spent") is not None else self.cash_spent
-        self.time_spent = params.get('time_spent') if params.get("time_spent") is not None else self.time_spent
-        self.revenue = params.get('revenue') if params.get("revenue") is not None else self.revenue
-        self.conversions = params.get('conversions') if params.get("conversions") is not None else self.conversions
-        self.profit = params.get('profit') if params.get("profit") is not None else self.profit
-        self.roi = params.get('roi') if params.get("roi") is not None else self.roi
+        self.gains = params.get('gains') if params.get("gains") is not None else self.gains
+        self.expense = params.get('expense') if params.get("expense") is not None else self.expense
         self.startTs = params.get('sts') if params.get("sts") is not None else self.startTs
         self.endTs = params.get('ets') if params.get("ets") is not None else self.endTs
         self.campaign_type = params.get('ctype') if params.get("ctype") is not None else self.campaign_type
         self.goal = params.get('goal') if params.get("goal") is not None else self.goal
         self.attrs = params.get('attrs') if params.get("attrs") is not None else self.attrs
+        self.notes = params.get('notes') if params.get("notes") is not None else self.notes
+        self.status = params.get('status') if params.get("status") is not None else self.status
+        self.roi = self.calculate_roi()
+        self.rank = self.calculate_rank()
         print "update "+self.desc
         db = init_db()
         db.add(self)
         db.commit()
         return self
+    def calculate_roi(self):
+        pass
+    def calculate_rank(self):
+        pass
     def delete(self):
         db = init_db()
         db.delete(self)
@@ -79,7 +97,7 @@ def init_db(transactional=False):
     Session = sessionmaker(bind=engine)
     session = Session()
     if(session.query(campaign_type).count() <=0):
-        for temp in types:
+        for temp in ctypes:
             session.add(campaign_type(desc=temp))
         session.commit()
 

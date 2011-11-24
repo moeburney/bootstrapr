@@ -1,6 +1,6 @@
 from base import Base
 from campaign import init_db
-from models.campaign import campaign, campaign_type, types
+from models.campaign import campaign, campaign_type, ctypes
 
 __author__ = 'rohan'
 
@@ -22,7 +22,7 @@ class MyTestCase(unittest.TestCase):
         db = init_db()
         for obj in db.query(campaign_type).order_by(campaign_type.id):
             print obj.desc
-            self.assertTrue(obj.desc in types)
+            self.assertTrue(obj.desc in ctypes)
     def test_merge(self):
         new_campaign = campaign(desc="Test Campaign")
 if __name__ == '__main__':

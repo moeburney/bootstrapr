@@ -10,31 +10,29 @@
     <h3>General: </h3>
     <input type="text" id="desc" name="desc" placeholder="Name of Campaign" required/><br/>
     <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
-        <option value="Google Adwords">Google Adwords</option>
-        <option value="Cold Email">Cold Email</option>
-        <option value="Cold Call">Cold Call</option>
-        <option value="Blog">Blog</option>
-        <option value="Media">Media</option>
-        <option value="Forum activity">Forum activity</option>
-        <option value="Twitter">Twitter</option>
-        <option value="White paper">White paper</option>
-        <option value="Ebook">Ebook</option>
-        <option value="Facebook">Facebook</option>
-      </select><br><br>
+    %for x in ctypes:
+      <option value="{{x.id}}">{{x.desc}}</option>
+    %end
+    </select><br>
+     <br>
         <input type=text id="goal" name="goal" placeholder="Goals of Campaign"/><br/>
     <input type=date id="sts" name="sts" placeholder="Campaign Start DateTime"/><br/>
-    <input type=date id="ets" name="ets" placeholder="Campaign End DateTime"/><br/><br/>
+    <input type=date id="ets" name="ets" placeholder="Campaign End DateTime"/><br/>
     <h3>Expenses: </h3>
-    <input type="number" id="time_spent" name="time_spent" placeholder="Hrs spent on Campaign"/><br/>
-    <input type="number" id="cash_spent" name="cash_spent" placeholder="Money Spent on Campaign"/><br/><br/>
+     <label for="gains">Type of Campaign: </label> <select id="gains" name="gains">
+    %for x in gains:
+      <option value="{{x}}">{{x}}</option>
+    %end
+    </select><br>
+     <br>
     <h3>Gains: </h3>
     <input type=number id="revenue" name="revenue" placeholder="Revenue"/><br/>
     <input type=number id="conversions" name="conversions" placeholder="Number of Conversions"/><br/>
     <input type=number id="profit" name="profit" placeholder="Profits Earned"/><br/>
-    <input type=number id="roi" name="roi" placeholder="Return on Investment"/><br/><br/>
-    <h3>Custom Data: </h3><br/>
+    <input type=number id="roi" name="roi" placeholder="Return on Investment"/><br/>
+    <h3>Custom Data: </h3>
     <input type=hidden id="attrs" name="attrs"/>
-    <button id="addData">Add Custom Data</button><br/>
+    <a id="addData">Add Custom Data</a><br/><br/>
     <input type="submit" id="submit" value="Create Campaign"/> <input type="reset" value="Clear"/>  <a href="/campaigns">Home</a><br/>
     </form>
 </form>
