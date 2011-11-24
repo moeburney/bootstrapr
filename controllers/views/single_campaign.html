@@ -1,9 +1,260 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Add Campaign</title>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
 </head>
 <body>
+%import datetime
+<form id="cform" action="/campaigns" method="POST">
+    <h3>General: </h3>
+    <input type=hidden id="uuid" name="uuid" value="{{item.uuid}}" />
+    <input type="text" id="desc" name="desc" placeholder="Name of Campaign" value="{{item.desc}}" required/><br/><br/>
+    <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
+    %if item.campaign_type is not 0:
+    <option value="{{item.campaign_type}}">{{item.campaign_desc}}</option>
+    %end
+    %for x in ctypes:
+    <option value="{{x.id}}">{{x.desc}}</option>
+    %end
+</select><br>
+    <br>
+    %if item.goal is not None:
+    <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value="{{item.goal}}" /><br>
+    %else:
+    <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value=0 /><br>
+    %end
+    <input type=date id="sts" name="sts" placeholder="Campaign Start DateTime" value="{{datetime.datetime.fromtimestamp(item.startTs)}}" /><br/>
+    <input type=date id="ets" name="ets" placeholder="Campaign End DateTime" value="{{datetime.datetime.fromtimestamp(item.endTs)}}" /><br/>
+    <hr>
+    <h3>Expenses: </h3>
+    <input type="hidden" id="expenses" name="expenses"/>
+    <label for="expensesselect">Type of Expense: </label> <select id="expensesselect" name="expensesselect">
+    %for x in expenses:
+    <option value="{{x}}">{{x}}</option>
+    %end
+</select>
+    <button id='addexpense'>+</button>
+    <button id='removeexpense'>-</button>
+    <div id="expenselist">
+        %for k,v in uexpenses.iteritems():
+            %if 'unitexpense' in v:
+            <label for="expense-name-{{k}}">{{k}}</label>
+            <input type="number" required id="expense-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/>
+            <label for="expense-val-{{k}}">$/Unit: </label>
+            <input type="number" required id="expense-val-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['unitexpense']}}"/><br/>
+        %else:
+        <label for="expense-name-{{k}}">{{k}}</label>
+            <input type="number" required id="expense-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/><br/>
+        %end
+        %end
+    </div>
+    <hr>
+    <h3>Gains: </h3>
+    <input type="hidden" id="gains" name="gains"/>
+    <label for="gainsselect">Type of Gain: </label> <select id="gainsselect" name="gainsselect">
+    %for x in gains:
+    <option value="{{x}}">{{x}}</option>
+    %end
+</select>
+    <button id='addgains'>+</button>
+    <button id='removegains'>-</button>
+    <div id="gainslist">
+        %for k,v in ugains.iteritems():
+            %if 'unitgain' in v:
+            <label for="gains-name-{{k}}">{{k}}</label>
+            <input type="number" required id="gains-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/>
+            <label for="gains-val-{{k}}">$/Unit: </label>
+            <input type="number" required id="gains-val-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['unitgain']}}"/><br/>
+        %else:
+        <label for="gains-name-{{k}}">{{k}}</label>
+            <input type="number" required id="gains-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/><br/>
+        %end
+        %end
+    </div>
+    <hr>
+    <h3>Misc: </h3>
+    <textarea name="notes" placeholder="Notes about the marketing blast" rows="6" cols="50"/>{{item.notes}}</textarea><br/>
+     <label for="status">Status of Blast: </label> <select id="status" name="status">
+    <option value="{{item.status}}">{{status[item.status]}}</option>
 
+    %for x in status:
+    %if(status.index(x) != item.status):
+    <option value="{{status.index(x)}}">{{x}}</option>
+    %end
+    %end
+</select>
+    <hr>
+    <h3>Custom Data: </h3>
+    <input type=hidden id="attrs" name="attrs"/>
+    <a id="addData">Add Custom Data</a><br/><br/>
+    %for k,v in uattrs.iteritems():
+    <label for="custom-{{k}}">{{k}}:</label>
+    <input id="custom-{{k}}" type="text" name="custom-{{k}}" placeholder="{{k}}" value="{{v}}" /><br/>
+    %end
+    <input type="submit" id="submit" value="Update"/> <a href="/campaigns">Home</a><br/>
+</form>
+</form>
+
+
+
+
+<div id="dialog-form" title="Create new data">
+    <form>
+        <fieldset>
+            <label for="name">Name: </label>
+            <input required type="text" name="name" id="name" class="text ui-widget-content ui-corner-all"
+                   placeholder="Name"/>
+            <select required id="dtype" name="dtype">
+                <option value="Text">Text</option>
+                <option value="TextArea">Big Text</option>
+                <option value="Number">Number</option>
+                <option value="Date">Date</option>
+                <option value="Email">Email</option>
+                <option value="url">url</option>
+            </select>
+        </fieldset>
+
+    </form>
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script type="text/javascript"> $(function() {
+    var expenselist = 0
+    $("#removeexpense").click(function() {
+        $("#expenselist").empty()
+        expenselist = 0
+    })
+    $('#addexpense').click(function() {
+        if (expenselist <= ($('#expensesselect option').length)) {
+            var text = $("#expensesselect option:selected").text().replace(/\s+/g, "")
+            if ($("#expense-name-" + text).length == 0) {
+                if (text == "MoneySpent") {
+                    $("#expenselist").append("<label for=expense-name-" + text + ">" + text + "</label>" + " <input type='number' required id='expense-name-" + text + "' name=" + text + " placeholder='" + text + "'/><br/>")
+                    expenselist += 1
+                }
+                else {
+                    $("#expenselist").append("<label for='expense-name-" + text + "'>" + text + "</label>" + " <input type='number' required id='expense-name-" + text + "' name=" + text + " placeholder='" + text + "'/> <label for='expense-val-" + text + "'>" + "$/Unit: " + "</label>" + " <input type='number' required id='expense-val-" + text + "' name=" + text + " placeholder='" + text + "'/><br/>")
+                    expenselist += 1
+                }
+            }
+        }
+    })
+    var collectExpenseData = function(){
+       var expense = {}
+       $("#expenselist input[id^=expense-]").each(function(item,value){
+           var name = $(value).attr('name')
+           var type = $(value).attr('id').split('-')[1]
+           var id = $(value).attr('id').split('-')[2]
+
+           var value = $(value).attr('value')
+           if(!expense.hasOwnProperty(name)){
+              expense[name] = {}
+           }
+           if(type === "name"){
+           expense[name]['quantity'] = value
+           }
+           if(type === "val"){
+               expense[name]['unitexpense'] = value
+           }
+       })
+
+       var stringi = JSON.stringify(expense)
+       $("#expenses").val(stringi)
+   }
+
+
+    var gainslist = 0
+    $("#removegains").click(function() {
+        $("#gainslist").empty()
+        gainslist = 0
+    })
+    $('#addgains').click(function() {
+
+        if (gainslist <= ($('#gainsselect option').length)) {
+            var text = $("#gainsselect option:selected").text().replace(/\s+/g, "")
+            if ($("#gains-name-" + text).length == 0) {
+                if (text == "Revenue") {
+                    $("#gainslist").append("<label for=gains-name-" + text + ">" + text + "</label>" + " <input type='number' required id='gains-name-" + text + "' name=" + text + " placeholder='" + text + "'/><br/>")
+                    gainslist += 1
+                }
+                else {
+                    $("#gainslist").append("<label for='gains-name-" + text + "'>" + text + "</label>" + " <input type='number' required id='gains-name-" + text + "' name=" + text + " placeholder='" + text + "'/> <label for='gains-val-" + text + "'>" + "$/Unit: " + "</label>" + " <input type='number' required id='gains-val-" + text + "' name=" + text + " placeholder='" + text + "'/><br/>")
+                    gainslist += 1
+                }
+            }
+        }
+    })
+// create json of gains {item :{ quantity : no. , dollarperunit : $$}
+   var collectGainsData = function(){
+       var gains = {}
+       $("#gainslist input[id^=gains-]").each(function(item,value){
+           var name = $(value).attr('name')
+           var type = $(value).attr('id').split('-')[1]
+           var id = $(value).attr('id').split('-')[2]
+           
+           var value = $(value).attr('value')
+           if(!gains.hasOwnProperty(name)){
+              gains[name] = {}
+           }
+           if(type === "name"){
+           gains[name]['quantity'] = value
+           }
+           if(type === "val"){
+               gains[name]['unitgain'] = value
+           }
+       })
+
+       var stringi = JSON.stringify(gains)
+       $("#gains").val(stringi)
+   }
+
+
+    $("input:submit, a, button,input:reset").button();
+    $("#addData").click(function() {
+        $("#dialog-form").dialog("open")
+    });
+    $("#cform").submit(function(event) {
+        event.preventDefault()
+        collectCustomData()
+        collectGainsData()
+        collectExpenseData()
+
+        return false;
+    })
+    var collectCustomData = function(){
+          var attrs = {}
+        $("input[id^=custom-]").each(function(item, value) {
+            attrs[$(value).attr('placeholder')] = $(value).val()
+        })
+        var stringi = JSON.stringify(attrs)
+        $('#attrs').val(stringi)
+    }
+    $("#dialog-form").dialog({
+        autoOpen: false,
+        height: 300,
+        width: 350,
+        modal: true,
+        buttons: {
+            "Create custom data": function() {
+                var name = $("#name").val().replace(/\s+/g, "")
+                var label = "<label for='custom-"+name+"'>"+name+": </label>"
+                $("#addData").before(label+"<input value='' id=custom-" + name + " required placeholder=" + name + " type=" + $("#dtype").val() + "/><br/>");
+                $(this).dialog("close");
+            },
+            Cancel: function() {
+                $(this).dialog("close");
+            },
+            close: function() {
+                $(this).dialog("close")
+            }
+        }
+
+    });
+});
+</script>
 </body>
 </html>
+
+

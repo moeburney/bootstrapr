@@ -35,18 +35,44 @@ class campaign(Base):
     id = Column(Integer,primary_key=True,autoincrement=True,unique=True)
     uuid = Column(String(100),default=uuid.uuid4().__str__())
     desc = Column(String(200),default="New Campaign")
-    gains = Column(String(1000)) #store gain types and their monetary weights
+    gains = Column(String(1000),default="{}") #store gain types and their monetary weights
     startTs = Column(BigInteger,default=0)
     endTs =     Column(BigInteger,default=0)
     campaign_type = Column(Integer)
     goal = Column(Integer)
     roi = Column(Integer,default=0)
     rank = Column(Integer,default=0)
-    expenses = Column(String(500))
-    attrs = Column(String(1000),default=json.dumps({"empty":True})) # a json for all other unique attributes
+    expenses = Column(String(1000),default="{}")
+    attrs = Column(String(1000),default="{}") # a json for all other unique attributes
     notes = Column(String(1000))
     status = Column(Integer,default=STATUS_PENDING)
-    
+
+    @hybrid_property  #todo , ask in irc if hybric property can be stored in db
+    def roi(self):
+        outtemp = json.loads(self.expenses)
+        intemp = json.loads(self.gains)
+        res=0
+        for k,v in intemp.iteritems():
+            if('unitgain' in v):
+                res += int(v['unitgain'])*int(v['quantity'])
+            else:
+                res += int(v['quantity'])
+        for k,v in outtemp.iteritems():
+            if('unitexpense' in v):
+                res -= int(v['unitexpense'])*int(v['quantity'])
+            else:
+                res -= int(v['quantity'])
+        return res
+    @hybrid_property
+    def rank(self):
+        db = init_db()
+        roidict = dict()
+        for obj in db.query(campaign.uuid,campaign.roi).all():
+            roidict[obj.uuid] = obj.roi
+        ranked = sorted(roidict,key=lambda obj:obj.roi)
+        return ranked.index(self.uuid)
+        
+            
     @hybrid_property
     def campaign_desc(self):
         obj = campaign_type_get_one(self.campaign_type)
@@ -66,17 +92,11 @@ class campaign(Base):
         self.attrs = params.get('attrs') if params.get("attrs") is not None else self.attrs
         self.notes = params.get('notes') if params.get("notes") is not None else self.notes
         self.status = params.get('status') if params.get("status") is not None else self.status
-        self.roi = self.calculate_roi()
-        self.rank = self.calculate_rank()
         print "update "+self.desc
         db = init_db()
         db.add(self)
         db.commit()
         return self
-    def calculate_roi(self):
-        pass
-    def calculate_rank(self):
-        pass
     def delete(self):
         db = init_db()
         db.delete(self)

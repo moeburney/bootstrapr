@@ -26,8 +26,8 @@
     <option value="{{x}}">{{x}}</option>
     %end
 </select>
-    <button id='addexpense'>+</button>
-    <button id='removeexpense'>-</button>
+    <button type="button" id='addexpense'>+</button>
+    <button type="button" id='removeexpense'>-</button>
     <div id="expenselist"></div>
     <hr>
     <h3>Gains: </h3>
@@ -37,8 +37,8 @@
     <option value="{{x}}">{{x}}</option>
     %end
 </select>
-    <button id='addgains'>+</button>
-    <button id='removegains'>-</button>
+    <button id='addgains' type="button">+</button>
+    <button id='removegains' type="button">-</button>
     <div id="gainslist"></div>
     <hr>
     <h3>Misc: </h3>
@@ -116,6 +116,7 @@
        })
 
        var stringi = JSON.stringify(expense)
+        alert(stringi)
        $("#expenses").val(stringi)
    }
 
@@ -162,6 +163,7 @@
        })
 
        var stringi = JSON.stringify(gains)
+       alert(stringi)
        $("#gains").val(stringi)
    }
 
@@ -171,12 +173,12 @@
         $("#dialog-form").dialog("open")
     });
     $("#cform").submit(function(event) {
-        event.preventDefault()
+
         collectCustomData()
         collectGainsData()
         collectExpenseData()
 
-        return false;
+        return true;
     })
     var collectCustomData = function(){
           var attrs = {}
@@ -193,7 +195,9 @@
         modal: true,
         buttons: {
             "Create custom data": function() {
-                $("#addData").before("<input value='' id=custom-" + $("#name").val() + " required placeholder=" + $("#name").val() + " type=" + $("#dtype").val() + "/><br/>");
+                var name = $("#name").val().replace(/\s+/g, "")
+                var label = "<label for='custom-"+name+"'>"+name+": </label>"
+                $("#addData").before(label+"<input value='' id=custom-" + name + " required placeholder=" + name + " type=" + $("#dtype").val() + "/><br/>");
                 $(this).dialog("close");
             },
             Cancel: function() {

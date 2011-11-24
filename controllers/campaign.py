@@ -80,7 +80,8 @@ def handler(id):
     s['id'] = id
     print obj.desc
     types = campaign_type_get_all(exclude=obj.campaign_type)
-    return dict(item=obj,attrs=json.loads(obj.attrs),ctypes=types,uattrs=json.loads(obj.attrs))
+
+    return dict(item=obj,ctypes=types,uattrs=json.loads(obj.attrs),gains=gaintypes,expenses=expensetypes,status=status,ugains=json.loads(obj.gains),uexpenses=json.loads(obj.expenses))
 
 @get('/campaigns/:id/destroy')
 @auth()
