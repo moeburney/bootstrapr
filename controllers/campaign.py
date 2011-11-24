@@ -3,6 +3,9 @@ from beaker.middleware import SessionMiddleware
 import bottle
 from models.campaign import get_all, get_one, campaign_type_get_all, campaign, gaintypes, expensetypes, status
 
+
+ENV =['Production','Development']
+
 __author__ = 'rohan'
 from bottle import route, run, request, get, post,view
 bottle.debug(True)
@@ -116,4 +119,3 @@ def handler(id):
     print "after bk "+obj.desc
     bottle.redirect('/campaigns/'+id)
     
-bottle.run(host='localhost', port=8080,app=app)
