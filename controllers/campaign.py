@@ -1,7 +1,7 @@
 import json
 from beaker.middleware import SessionMiddleware
 import bottle
-from models.campaign import get_all, get_one, campaign_type_get_all, campaign, gaintypes, expensetypes
+from models.campaign import get_all, get_one, campaign_type_get_all, campaign, gaintypes, expensetypes, status
 
 __author__ = 'rohan'
 from bottle import route, run, request, get, post,view
@@ -51,9 +51,7 @@ def handler():
     login(request.POST.get('user'),request.POST.get('passwd'))
     if not validate_login():
         bottle.redirect('/campaigns/login.html?err=invalid')
-    if('logout' or 'login' in bottle.request.header.get('Referer')):
-        bottle.redirect('/campaigns')
-    bottle.redirect(bottle.request.header.get('Referer'))
+    bottle.redirect('/campaigns')
 @get('/campaigns/logout')
 def handler():
     logout()
@@ -97,7 +95,7 @@ def handler(id):
 @auth()
 @view('new_campaign')
 def handler():
-    return dict(ctypes=campaign_type_get_all(),gains=gaintypes,expenses=expensetypes)
+    return dict(ctypes=campaign_type_get_all(),gains=gaintypes,expenses=expensetypes,status=status)
 @post('/campaigns')
 @auth()
 def handler():

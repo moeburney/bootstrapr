@@ -14,7 +14,7 @@ from sqlalchemy import Column, Integer,String,Float,BigInteger
 Base = declarative_base()
 ctypes = ['Google Adwords', 'Cold Email', 'Cold Call', 'Blog', 'Media', 'Forum activity', 'Twitter', 'White paper', 'Ebook','Facebook']
 gaintypes = ['Conversions','Mailing List Subscriptions','Sales','Views','Interactions','Revenue']
-expensetypes = ['Hours Spent','Money Spent']
+expensetypes = ['Time Spent','Money Spent']
 status = ['Finished','Pending','Ongoing']
 STATUS_FINISHED=0
 STATUS_PENDING=1
@@ -42,7 +42,7 @@ class campaign(Base):
     goal = Column(Integer)
     roi = Column(Integer,default=0)
     rank = Column(Integer,default=0)
-    expense = Column(String(500))
+    expenses = Column(String(500))
     attrs = Column(String(1000),default=json.dumps({"empty":True})) # a json for all other unique attributes
     notes = Column(String(1000))
     status = Column(Integer,default=STATUS_PENDING)
@@ -58,7 +58,7 @@ class campaign(Base):
         self.uuid = params.get('uuid') if params.get("uuid") is not None else self.uuid
         self.desc = params.get('desc') if params.get("desc") is not None else self.desc
         self.gains = params.get('gains') if params.get("gains") is not None else self.gains
-        self.expense = params.get('expense') if params.get("expense") is not None else self.expense
+        self.expenses = params.get('expenses') if params.get("expenses") is not None else self.expense
         self.startTs = params.get('sts') if params.get("sts") is not None else self.startTs
         self.endTs = params.get('ets') if params.get("ets") is not None else self.endTs
         self.campaign_type = params.get('ctype') if params.get("ctype") is not None else self.campaign_type
