@@ -1,19 +1,35 @@
 import json
+import profile
 import uuid
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.sql.expression import and_
+import time
 
 __author__ = 'rohan'
 from sqlalchemy import Column, Integer,String,Float,BigInteger
-
+engine = create_engine("mysql://rohan:gotohome@localhost/ron")
 Base = declarative_base()
 ctypes = ['Google Adwords', 'Cold Email', 'Cold Call', 'Blog', 'Media', 'Forum activity', 'Twitter', 'White paper', 'Ebook','Facebook']
 gaintypes = ['Conversions','Mailing List Subscriptions','Sales','Views','Interactions','Revenue']
 expensetypes = ['Time Spent','Money Spent']
 status = ['Finished','Pending','Ongoing']
+chat_type = ['email','social media','call','physical']
+CHAT_EMAIL=0
+CHAT_SOCIAL_MEDIA=1
+CHAT_CALL=2
+CHAT_PHYSICAL=3
+profile_types = ['owner','contact']
+status_profile = ['Prospect','Subscriber','Paid user']
+STATUS_PROFILE_PROSPECT=0
+STATUS_PROFILE_SUBSCRIBER=1
+STATUS_PROFILE_PAIDUSER=2
+PROFILE_OWNER=0
+PROFILE_CONTACT=1
 STATUS_FINISHED=0
 STATUS_PENDING=1
 STATUS_ONGOING=2
@@ -44,7 +60,7 @@ class campaign(Base):
     attrs = Column(String(1000),default="{}") # a json for all other unique attributes
     notes = Column(String(1000))
     status = Column(Integer,default=STATUS_PENDING)
-
+    profiles = relationship("profile",order_by=profile.id,back_populates="campaign",cascade="all",secondary=link_table)
     @hybrid_property
     def outgo(self):
         outtemp = json.loads(self.expenses)
@@ -86,40 +102,95 @@ class campaign(Base):
         if(obj is not None):
             return obj.desc
         return None
+
     def update(self,params):
-        self.id = params.get('id') if params.get("id") is not None else self.id
-        self.uuid = params.get('uuid') if params.get("uuid") is not None else self.uuid
-        self.desc = params.get('desc') if params.get("desc") is not None else self.desc
-        self.gains = params.get('gains') if params.get("gains") is not None else self.gains
-        self.expenses = params.get('expenses') if params.get("expenses") is not None else self.expense
-        self.startTs = params.get('sts') if params.get("sts") is not None else self.startTs
-        self.endTs = params.get('ets') if params.get("ets") is not None else self.endTs
-        self.campaign_type = params.get('ctype') if params.get("ctype") is not None else self.campaign_type
-        self.goal = params.get('goal') if params.get("goal") is not None else self.goal
-        self.attrs = params.get('attrs') if params.get("attrs") is not None else self.attrs
-        self.notes = params.get('notes') if params.get("notes") is not None else self.notes
-        self.status = params.get('status') if params.get("status") is not None else self.status
-        print "update "+self.desc
+        self.id = params.get('id') if 'id' in params else self.id
+        self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
+        self.desc = params.get('desc') if 'desc' in params else self.desc
+        self.gains = params.get('gains') if 'gains' in params else self.gains
+        self.expenses = params.get('expenses') if 'expenses' in params else self.expense
+        self.startTs = params.get('sts') if "sts" in params else self.startTs
+        self.endTs = params.get('ets') if "ets" in params else self.endTs
+        self.campaign_type = params.get('ctype') if "ctype" in params else self.campaign_type
+        self.goal = params.get('goal') if "goal" in params else self.goal
+        self.attrs = params.get('attrs') if "attrs" in params else self.attrs
+        self.notes = params.get('notes') if "notes" in params else self.notes
+        self.status = params.get('status') if "status" in params else self.status
+        print "update blast "+self.desc
         db = init_db()
         db.add(self)
         db.commit()
-        return self
+
     def delete(self):
         db = init_db()
         db.delete(self)
         db.commit()
+
 
 class campaign_type(Base):
     __tablename__ = "campaign_types"
     id = Column(Integer,primary_key=True,autoincrement=True,unique=True)
     desc = Column(String(200),default="Default Type")
     details = Column(String(1000)) # a json describing extra attributes of this campaign type
+
+link_table = Table('association', Base.metadata,
+    Column('campaign_id', Integer, ForeignKey('campaign.id')),
+    Column('profile_id', Integer, ForeignKey('profile.id'))
+)
+
+class profile(Base):
+    __tablename__= "profiles"
+    id = Column(Integer,primary_key=True,autoincrement=True,unique=True)
+    uuid = Column(String(100),default=uuid.uuid4().__str__())
+    name = Column(String(200),default="New Profile")
+    pemail = Column(String(50))
+    campaign_id = Column(Integer,ForeignKey(campaign.id))
+    profile_type = Column(Integer,default=PROFILE_CONTACT,nullable=False)
+    status = Column(Integer,default=STATUS_PROFILE_PROSPECT)
+    chats  = relationship("chats",back_populates="profile",cascade="all, delete-orphan")
+    campaign = relationship("campaign",back_populates="profiles")
+    
+    def update(self,params):
+        self.id = params.get('id') if 'id' in params else self.id
+        self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
+        self.name = params.get('name') if 'name' in params else self.name
+        self.pemail = params.get('pemail') if 'pemail' in params else self.pemail
+        self.campaign_id = params.get('campaign_id') if 'campaign_id' in params else self.campaign_id
+        self.profile_type = params.get('ptype') if 'ptype' in params else self.profile_type
+        self.status = params.get('pstatus') if 'pstatus' in params else self.status
+        print "update profile "+self.desc
+        db = init_db()
+        db.add(self)
+        db.commit()
+
+class chats(Base):
+    __tablename__ = "chats"
+    id = Column(Integer,primary_key=True,autoincrement=True,unique=True)
+    uuid = Column(String(100),default=uuid.uuid4().__str__())
+    profile_id = Column(Integer,ForeignKey(profile.id))
+    ts = Column(float,default=time.time())
+    content = Column(String(500),default="No Comments")
+    type = Column(Integer)
+    parent_chat = Column(Integer,ForeignKey(chat.id))
+    replies = relationship("chats",backref=backref("topic",remote_side=[id]))
+    profile = relationship("profile",back_populates="profile")
+
+    def update(self,params):
+        self.id = params.get('id') if 'id' in params else self.id
+        self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
+        self.profile_id = params.get('profile_id') if 'profile_ud' in params else self.profile_id
+        self.ts = params.get('ts') if 'ts' in params else self.ts
+        self.content = params.get('content') if 'content' in params else self.content
+        self.type = params.get('type') if 'type' in params else self.type
+        self.parent_chat = params.get('parent_chat') if 'parent_chat' in params else self.parent_chat
+
 def campaign_type_get_all(exclude=None):
     return init_db().query(campaign_type).filter(campaign_type.id !=exclude)
+
 def campaign_type_get_one(typeid):
     return init_db().query(campaign_type).filter(campaign_type.id == typeid).first()
+
 def init_db(transactional=False):
-    engine = create_engine("mysql://rohan:gotohome@localhost/ron")
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -130,10 +201,20 @@ def init_db(transactional=False):
 
     return session
 
+def profile_get_all():
+    return init_db().query(profile).all()
+def profile_get_all_by(campaign_id):
+    return get_one(campaign_id).profiles
+def profile_get_one(profile_id,profile_uuid=None):
+    return init_db().query(profile).filter(profile.id==profile_id).first() if profile_uuid is None else init_db().query(profile).filter(and_(profile.id==profile_id,profile.uuid==profile_uuid)).first()
+
 def get_all():
     return init_db().query(campaign).all()
 
 def get_one(id,uuid=None):
     return init_db().query(campaign).filter(campaign.id==id).first() if uuid is None else init_db().query(campaign).filter(and_(campaign.id==id,campaign.uuid==uuid)).first()
+
+
+    
 if __name__ == "__main__":
     init_db()

@@ -119,3 +119,38 @@ def handler(id):
     print "after bk "+obj.desc
     bottle.redirect('/campaigns/'+id)
     
+
+#/campaigns/:id/contacts/
+@get("/campaigns/contacts")
+@auth()
+def handler():
+    return "All contacts"
+@get('/campaigns/:id/contacts')
+@auth()
+def handler(id):
+    obj = get_one(id)
+    if(obj is None):
+        bottle.redirect("/campaigns")
+    return "all contacts of "+obj.desc
+
+@post("/campaigns/:id/contacts")
+@auth()
+def handler(id):
+    return "created new contact"
+
+@get("/campaigns/:id/contacts/:cid")
+@auth()
+def handler(id,cid):
+    obj = get_one(id)
+    return "Contact no. "+cid+" for "+(obj.desc if obj is not None else "")
+@post("/campaigns/:id/contacts/:cid")
+@auth()
+def handler(id,cid):
+    obj = get_one(id)
+    return "Contact no. "+cid+" update for marketing blast "+(obj.desc if obj is not None else "")
+
+@get("/campaigns/:id/contacts/new")
+@auth()
+def handler(id):
+    obj = get_one(id)
+    return "Create new contact for marketing blast "+(obj.desc if obj is not None else "")
