@@ -5,6 +5,7 @@ from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.schema import Column, Table, ForeignKey
 from sqlalchemy.sql.expression import and_
 from sqlalchemy.types import Integer, String, BigInteger, Float
@@ -50,8 +51,8 @@ class campaign_type(Base):
     details = Column(String(1000)) # a json describing extra attributes of this campaign type
 
 link_table = Table('association', Base.metadata,
-                   Column('campaign_id', Integer, ForeignKey('campaign.id')),
-                   Column('profile_id', Integer, ForeignKey('profile.id'))
+                   Column('campaign_id', Integer, ForeignKey('campaigns.id')),
+                   Column('profile_id', Integer, ForeignKey('profiles.id'))
 )
 
 class campaign(Base):
@@ -70,7 +71,7 @@ class campaign(Base):
     attrs = Column(String(1000), default="{}") # a json for all other unique attributes
     notes = Column(String(1000))
     status = Column(Integer, default=STATUS_PENDING)
-    profiles = relationship(profile, backref="campaign", cascade="all", secondary=link_table)
+    profiles = relationship("profile", backref="campaigns", cascade="all", secondary=link_table)
 
     @hybrid_property
     def outgo(self):
@@ -139,10 +140,7 @@ class campaign(Base):
         db.delete(self)
         db.commit()
 
-
-
-class chats(Base):
-    import profile
+class chat(Base):
     __tablename__ = "chats"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     uuid = Column(String(100), default=uuid.uuid4().__str__())
@@ -151,9 +149,9 @@ class chats(Base):
     content = Column(String(500), default="No Comments")
     type = Column(Integer)
     details = Column(String(500), default="{}")
-    parent_chat = Column(Integer, ForeignKey("chats.id"))
-    replies = relationship("chats", backref=backref("topic", remote_side=["chats.id"]))
-    profile = relationship("profile", back_populates="profile")
+    parent_chat = Column(Integer, ForeignKey(id))
+    replies = relationship("chat", backref=backref("topic", remote_side=[id]))
+    
 
     def update(self, params):
         self.id = params.get('id') if 'id' in params else self.id
@@ -180,8 +178,7 @@ class profile(Base):
     campaign_id = Column(Integer, ForeignKey(campaign.id))
     profile_type = Column(Integer, default=PROFILE_CONTACT, nullable=False)
     status = Column(Integer, default=STATUS_PROFILE_PROSPECT)
-    chats = relationship("chats", back_populates="profile", cascade="all, delete-orphan")
-    campaign = relationship("campaigns", backref="profiles")
+    chats = relationship("chat", backref="profile", cascade="all, delete-orphan")
 
     def update(self, params):
         self.id = params.get('id') if 'id' in params else self.id
@@ -221,11 +218,11 @@ def init_db(transactional=False):
     session = Session()
     return session
 def get_all():
-    return init_db().query("campaigns").all()
+    return init_db().query(campaign).all()
 
 
 def get_one(id, uuid=None):
-    return init_db().query("campaigns").filter(campaign.campaign.id == id).first() if uuid is None else init_db().query(
+    return init_db().query(campaign).filter(campaign.campaign.id == id).first() if uuid is None else init_db().query(
         campaign.campaign).filter(and_(campaign.campaign.id == id, campaign.campaign.uuid == uuid)).first()
 
 def campaign_type_get_all(exclude=None):

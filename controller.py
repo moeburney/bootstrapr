@@ -1,8 +1,7 @@
 import json
 from beaker.middleware import SessionMiddleware
 import bottle
-from model import campaign, status, expensetypes, gaintypes
-from utils import get_all, campaign_type_get_all, get_one
+from model import campaign, status, expensetypes, gaintypes, get_all, get_one, campaign_type_get_all
 
 __author__ = 'rohan'
 
