@@ -1,6 +1,4 @@
 import json
-from models.base import Base
-import datetime
 import uuid
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base

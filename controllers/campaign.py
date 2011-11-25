@@ -61,7 +61,7 @@ def handler():
     bottle.redirect('/campaigns')
 @get('/campaigns')
 @view('all_campaigns')
-@auth()
+#@auth()
 def handler():
     get_session()['ip'] = request.environ['REMOTE_ADDR']
     objs = get_all()
@@ -73,7 +73,7 @@ def handler():
     return dict(items = objs)
 
 @get('/campaigns/:id')
-@auth()
+#@auth()
 @view('single_campaign')
 def handler(id):
     obj = get_one(id)
@@ -87,7 +87,7 @@ def handler(id):
     return dict(item=obj,ctypes=types,uattrs=json.loads(obj.attrs),gains=gaintypes,expenses=expensetypes,status=status,ugains=json.loads(obj.gains),uexpenses=json.loads(obj.expenses))
 
 @get('/campaigns/:id/destroy')
-@auth()
+#@auth()
 def handler(id):
     obj = get_one(id)
     if(obj is None):
@@ -96,12 +96,12 @@ def handler(id):
     bottle.redirect('/campaigns')
 
 @get('/campaigns/new')
-@auth()
+#@auth()
 @view('new_campaign')
 def handler():
     return dict(ctypes=campaign_type_get_all(),gains=gaintypes,expenses=expensetypes,status=status)
 @post('/campaigns')
-@auth()
+#@auth()
 def handler():
     obj = campaign()
     obj.update(request.POST)
@@ -110,7 +110,7 @@ def handler():
     bottle.redirect('/campaigns/'+str(obj.id))
 
 @post('/campaigns/:id')
-@auth()
+#@auth()
 def handler(id):
     obj = get_one(id,uuid=request.POST.get("uuid"))
     if(obj is None):
