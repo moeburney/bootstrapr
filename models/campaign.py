@@ -47,9 +47,18 @@ class campaign(Base):
     notes = Column(String(1000))
     status = Column(Integer,default=STATUS_PENDING)
 
-    @hybrid_property  #todo , ask in irc if hybric property can be stored in db
-    def roi(self):
+    @hybrid_property
+    def outgo(self):
         outtemp = json.loads(self.expenses)
+        res = 0
+        for k,v in outtemp.iteritems():
+            if('unitexpense' in v):
+                res += int(v['unitexpense'])*int(v['quantity'])
+            else:
+                res += int(v['quantity'])
+        return res
+    @hybrid_property
+    def incomes(self):
         intemp = json.loads(self.gains)
         res=0
         for k,v in intemp.iteritems():
@@ -57,12 +66,12 @@ class campaign(Base):
                 res += int(v['unitgain'])*int(v['quantity'])
             else:
                 res += int(v['quantity'])
-        for k,v in outtemp.iteritems():
-            if('unitexpense' in v):
-                res -= int(v['unitexpense'])*int(v['quantity'])
-            else:
-                res -= int(v['quantity'])
+
         return res
+    @hybrid_property  #todo , ask in irc if hybric property can be stored in db
+    def roi(self):
+        return self.incomes - self.outgo
+
     @hybrid_property
     def rank(self):
         db = init_db()
