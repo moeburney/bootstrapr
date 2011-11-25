@@ -4,11 +4,11 @@
     <title>Add Campaign</title>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="../../campaigns/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="../campaigns/css/base.css" />
 
 </head>
 <body>
-<form id="cform" action="/campaigns" method="POST">
+<form id="cform" action="/src/campaignsigns" method="POST">
     <h3>General: </h3>
     <input type="text" id="desc" name="desc" placeholder="Name of Campaign" required/><br/><br/>
     <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
@@ -56,7 +56,7 @@
     <h3>Custom Data: </h3>
     <input type=hidden id="attrs" name="attrs"/>
     <a id="addData">Add Custom Data</a><br/><br/>
-    <input type="submit" id="submit" value="Create Campaign"/> <input type="reset" value="Clear"/> <a href="/campaigns">Home</a><br/>
+    <input type="submit" id="submit" value="Create Campaign"/> <input type="reset" value="Clear"/> <a href="/src/campaignsigns">Home</a><br/>
 </form>
 </form>
 <div id="dialog-form" title="Create new data">

@@ -1,10 +1,8 @@
 import argparse
-import sys
-from controllers.campaign import app
 import bottle
+from controller import app
 
 __author__ = 'rohan'
-
 parser= argparse.ArgumentParser(description="Run Script for Marketing blasts")
 parser.add_argument("-env",dest="env",action="store")
 parser.add_argument("-p",dest="port",action="store")
