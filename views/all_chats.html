@@ -27,7 +27,7 @@
         <td>{{chat_type[x.type]}}</td>
         <td>{{x.content}}</td>
         <td><a href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}">Edit</a> &nbsp;&nbsp; <a
-                href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}/reply">Reply</a>
+                href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}/reply">{{len(x.replies)}} Replies</a>
     </tr>
     %end
     </tfoot>

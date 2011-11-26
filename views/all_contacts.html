@@ -34,7 +34,7 @@
         <td>{{status_profile[x.status]}}</td>
         <td><a href="/campaigns/contacts/{{x.id}}">Details</a></td>
         %if x.chats:
-        <td>{{x.latest}}&nbsp; <a href="/campaigns/contacts/{{x.id}}/chats/{{x.chats[0].id}}">view</a></td>
+        <td>{{x.latest}}&nbsp; <a href="/campaigns/contacts/{{x.id}}/chats">view</a></td>
         %else:
          <td>none&nbsp; </td>
         %end

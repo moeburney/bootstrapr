@@ -250,6 +250,31 @@ def handle(cid):
     bottle.redirect(url_root_contacts + '/' + cid + '/chats/' + str(obj.id)) if obj else bottle.redirect(
         url_root_contacts)
 
+@get(url_root_contacts+'/:cid/chats/:id/reply')
+@auth()
+@view("reply_chat")
+def handler(cid,id):
+
+    db = init_db()
+    obj = db.query(chat).filter(chat.id==id).first()
+    return dict(chat=obj)
+@post(url_root_contacts+'/:cid/chats/:id/reply')
+@auth()
+def handler(cid,id):
+    sess = get_session()
+    db = init_db()
+    current_profile = db.query(profile).filter(profile.id==sess['uid']).first()
+    curr_chat = db.query(chat).filter(chat.id==id).first()
+    reply = chat()
+    reply.update(request.POST,session=db)
+    curr_chat.replies.append(reply)
+    curr_chat.save(session=db)
+    reply.save(session=db)
+    current_profile.chats.append(reply)
+    current_profile.save(session=db)
+    print reply.topic.content
+    bottle.redirect(url_root_contacts+'/%s/chats/%s/reply' % (cid,id))
+
 
 @get(url_root_contacts + '/:cid/chats/:id')
 @auth()
