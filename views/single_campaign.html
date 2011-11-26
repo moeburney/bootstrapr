@@ -4,7 +4,7 @@
     <title>Add Campaign</title>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
 
 </head>
 <body>
@@ -12,7 +12,7 @@
 %import datetime
 <form id="cform" action="/campaigns/{{item.id}}" method="POST">
     <h3>General: </h3>
-    <input type=hidden id="uuid" name="uuid" value="{{item.uuid}}" />
+    <input type=hidden id="uuid" name="uuid" value="{{item.uuid}}"/>
     <input type="text" id="desc" name="desc" placeholder="Name of Campaign" value="{{item.desc}}" required/><br/><br/>
     <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
     %if item.campaign_type is not 0:
@@ -24,11 +24,11 @@
 </select><br>
     <br>
     %if item.goal is not None:
-    <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value="{{item.goal}}" /><br>
+    <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value="{{item.goal}}"/><br>
     %else:
-    <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value=0 /><br>
+    <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value=0/><br>
     %end
-      <label for="datepick">Start Date: </label> <input type="text" id='datepick'><br/>
+    <label for="datepick">Start Date: </label> <input type="text" id='datepick'><br/>
     <label for="datepick1">End Date: </label> <input type="text" id='datepick1' placeholder="End date"/>
     <input type='hidden' id="sts" name="sts" value="{{item.startTs}}"/><br/>
     <input type='hidden' id="ets" name="ets" value="{{item.endTs}}"/><br/>
@@ -44,14 +44,17 @@
     <button id='removeexpense'>-</button>
     <div id="expenselist">
         %for k,v in uexpenses.iteritems():
-            %if 'unitexpense' in v:
-            <label for="expense-name-{{k}}">{{k}}</label>
-            <input type="number" required id="expense-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/>
-            <label for="expense-val-{{k}}">$/Unit: </label>
-            <input type="number" required id="expense-val-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['unitexpense']}}"/><br/>
+        %if 'unitexpense' in v:
+        <label for="expense-name-{{k}}">{{k}}</label>
+        <input type="number" required id="expense-name-{{k}}" name="{{k}}" placeholder="{{k}}"
+               value="{{v['quantity']}}"/>
+        <label for="expense-val-{{k}}">$/Unit: </label>
+        <input type="number" required id="expense-val-{{k}}" name="{{k}}" placeholder="{{k}}"
+               value="{{v['unitexpense']}}"/><br/>
         %else:
         <label for="expense-name-{{k}}">{{k}}</label>
-            <input type="number" required id="expense-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/><br/>
+        <input type="number" required id="expense-name-{{k}}" name="{{k}}" placeholder="{{k}}"
+               value="{{v['quantity']}}"/><br/>
         %end
         %end
     </div>
@@ -67,21 +70,23 @@
     <button id='removegains'>-</button>
     <div id="gainslist">
         %for k,v in ugains.iteritems():
-            %if 'unitgain' in v:
-            <label for="gains-name-{{k}}">{{k}}</label>
-            <input type="number" required id="gains-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/>
-            <label for="gains-val-{{k}}">$/Unit: </label>
-            <input type="number" required id="gains-val-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['unitgain']}}"/><br/>
+        %if 'unitgain' in v:
+        <label for="gains-name-{{k}}">{{k}}</label>
+        <input type="number" required id="gains-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/>
+        <label for="gains-val-{{k}}">$/Unit: </label>
+        <input type="number" required id="gains-val-{{k}}" name="{{k}}" placeholder="{{k}}"
+               value="{{v['unitgain']}}"/><br/>
         %else:
         <label for="gains-name-{{k}}">{{k}}</label>
-            <input type="number" required id="gains-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/><br/>
+        <input type="number" required id="gains-name-{{k}}" name="{{k}}" placeholder="{{k}}" value="{{v['quantity']}}"/><br/>
         %end
         %end
     </div>
     <hr>
     <h3>Misc: </h3>
-    <textarea name="notes" placeholder="Notes about the marketing blast" rows="6" cols="50"/>{{item.notes}}</textarea><br/>
-     <label for="status">Status of Blast: </label> <select id="status" name="status">
+    <textarea name="notes" placeholder="Notes about the marketing blast" rows="6" cols="50"/>{{item.notes}}</textarea>
+    <br/>
+    <label for="status">Status of Blast: </label> <select id="status" name="status">
     <option value="{{item.status}}">{{status[item.status]}}</option>
 
     %for x in status:
@@ -96,13 +101,11 @@
     <a id="addData">Add Custom Data</a><br/><br/>
     %for k,v in uattrs.iteritems():
     <label for="custom-{{k}}">{{k}}:</label>
-    <input id="custom-{{k}}" type="text" name="custom-{{k}}" placeholder="{{k}}" value="{{v}}" /><br/>
+    <input id="custom-{{k}}" type="text" name="custom-{{k}}" placeholder="{{k}}" value="{{v}}"/><br/>
     %end
     <input type="submit" id="submit" value="Update"/> <a href="/src/campaignsigns">Home</a><br/>
 </form>
 </form>
-
-
 
 
 <div id="dialog-form" title="Create new data">
@@ -127,21 +130,21 @@
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script type="text/javascript"> $(function() {
 
-$( "#datepick" ).datepicker({
-			altField: "#sts",
-			altFormat: "@",
-            dateFormat : "dd-mm-yy"
+    $("#datepick").datepicker({
+        altField: "#sts",
+        altFormat: "@",
+        dateFormat : "dd-mm-yy"
 
-		});
-    $("#datepick").datepicker("setDate",new Date((Number($("#sts").val()))))
-	$( "#datepick1" ).datepicker({
-			altField: "#ets",
-			altFormat: "@",
-            dateFormat : "dd-mm-yy"
+    });
+    $("#datepick").datepicker("setDate", new Date((Number($("#sts").val()))))
+    $("#datepick1").datepicker({
+        altField: "#ets",
+        altFormat: "@",
+        dateFormat : "dd-mm-yy"
 
-		});
+    });
 
-    $("#datepick1").datepicker("setDate",new Date((Number($("#ets").val()))))
+    $("#datepick1").datepicker("setDate", new Date((Number($("#ets").val()))))
 
 
     var expenselist = 0
@@ -164,28 +167,28 @@ $( "#datepick" ).datepicker({
             }
         }
     })
-    var collectExpenseData = function(){
-       var expense = {}
-       $("#expenselist input[id^=expense-]").each(function(item,value){
-           var name = $(value).attr('name')
-           var type = $(value).attr('id').split('-')[1]
-           var id = $(value).attr('id').split('-')[2]
+    var collectExpenseData = function() {
+        var expense = {}
+        $("#expenselist input[id^=expense-]").each(function(item, value) {
+            var name = $(value).attr('name')
+            var type = $(value).attr('id').split('-')[1]
+            var id = $(value).attr('id').split('-')[2]
 
-           var value = $(value).attr('value')
-           if(!expense.hasOwnProperty(name)){
-              expense[name] = {}
-           }
-           if(type === "name"){
-           expense[name]['quantity'] = value
-           }
-           if(type === "val"){
-               expense[name]['unitexpense'] = value
-           }
-       })
+            var value = $(value).attr('value')
+            if (!expense.hasOwnProperty(name)) {
+                expense[name] = {}
+            }
+            if (type === "name") {
+                expense[name]['quantity'] = value
+            }
+            if (type === "val") {
+                expense[name]['unitexpense'] = value
+            }
+        })
 
-       var stringi = JSON.stringify(expense)
-       $("#expenses").val(stringi)
-   }
+        var stringi = JSON.stringify(expense)
+        $("#expenses").val(stringi)
+    }
 
 
     var gainslist = 0
@@ -210,28 +213,28 @@ $( "#datepick" ).datepicker({
         }
     })
 // create json of gains {item :{ quantity : no. , dollarperunit : $$}
-   var collectGainsData = function(){
-       var gains = {}
-       $("#gainslist input[id^=gains-]").each(function(item,value){
-           var name = $(value).attr('name')
-           var type = $(value).attr('id').split('-')[1]
-           var id = $(value).attr('id').split('-')[2]
-           
-           var value = $(value).attr('value')
-           if(!gains.hasOwnProperty(name)){
-              gains[name] = {}
-           }
-           if(type === "name"){
-           gains[name]['quantity'] = value
-           }
-           if(type === "val"){
-               gains[name]['unitgain'] = value
-           }
-       })
+    var collectGainsData = function() {
+        var gains = {}
+        $("#gainslist input[id^=gains-]").each(function(item, value) {
+            var name = $(value).attr('name')
+            var type = $(value).attr('id').split('-')[1]
+            var id = $(value).attr('id').split('-')[2]
 
-       var stringi = JSON.stringify(gains)
-       $("#gains").val(stringi)
-   }
+            var value = $(value).attr('value')
+            if (!gains.hasOwnProperty(name)) {
+                gains[name] = {}
+            }
+            if (type === "name") {
+                gains[name]['quantity'] = value
+            }
+            if (type === "val") {
+                gains[name]['unitgain'] = value
+            }
+        })
+
+        var stringi = JSON.stringify(gains)
+        $("#gains").val(stringi)
+    }
 
 
     $("input:submit, a, button,input:reset").button();
@@ -245,8 +248,8 @@ $( "#datepick" ).datepicker({
 
         return true;
     })
-    var collectCustomData = function(){
-          var attrs = {}
+    var collectCustomData = function() {
+        var attrs = {}
         $("input[id^=custom-]").each(function(item, value) {
             attrs[$(value).attr('placeholder')] = $(value).val()
         })
@@ -261,8 +264,8 @@ $( "#datepick" ).datepicker({
         buttons: {
             "Create custom data": function() {
                 var name = $("#name").val().replace(/\s+/g, "")
-                var label = "<label for='custom-"+name+"'>"+name+": </label>"
-                $("#addData").before(label+"<input value='' id=custom-" + name + " required placeholder=" + name + " type=" + $("#dtype").val() + "/><br/>");
+                var label = "<label for='custom-" + name + "'>" + name + ": </label>"
+                $("#addData").before(label + "<input value='' id=custom-" + name + " required placeholder=" + name + " type=" + $("#dtype").val() + "/><br/>");
                 $(this).dialog("close");
             },
             Cancel: function() {

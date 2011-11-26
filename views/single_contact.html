@@ -9,11 +9,16 @@
 <body>
 %include common_menu
 %include common_contact_menu cid=obj.id
+%from model import PROFILE_OWNER
 <form action="/campaigns/contacts/{{obj.id}}" method="POST">
     <input type="hidden" id="uuid" name="uuid" value="{{obj.uuid}}"/>
     <input type="text" id="name" name="name" placeholder="Name" required value="{{obj.name}}"/><br/>
+    %if obj.profile_type == PROFILE_OWNER:
+    <input type="password" id='passwd' name="passwd" placeholder="Password" required value="{{obj.passwd}}" /><br/>
+    %end
     <input type="email" id="pemail" name="pemail" placeholder="Email" required value="{{obj.pemail}}"/><br/>
-    <label for="campaign_id"/>Marketing Blast: </label>{{campaign_name.desc}}<br/><br/>
+    %if not (obj.profile_type == PROFILE_OWNER):
+    <label for="campaign_id"/>Marketing Blast: </label>{{campaign[0].desc}}<br/><br/>
     <label for="pstatus"/>Type: </label><select id="pstatus" name="pstatus">
     <option value="{{obj.status}}">{{pstatuses[obj.status]}}</option>
     %for x in pstatuses:
@@ -21,7 +26,9 @@
     <option value="{{pstatuses.index(x)}}">{{x}}</option>
     %end
     %end
+
 </select><br/>
+    %end
     <input type="submit" value="Update"/>
 </form>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>

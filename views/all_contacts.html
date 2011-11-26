@@ -2,24 +2,51 @@
 <html>
 <head>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
-  <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css" />
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
 </head>
 <body>
 %include common_menu
 <table border="1">
-<thead> <tr><th>Name</th><th>Acquisition channel</th><th># of correspondence</th><th>Status</th><th>full details</th><th>Latest</th></tr></thead>
-<tfoot>
-%from model import status_profile
-%for x in items:
-<tr><td>{{x.name}}</td><td>{{x.campaign.desc}}</td><td>{{len(x.chats)}} &nbsp; <a href="/campaigns/contacts/{{x.id}}/chats">View All</a> </td>
-    <td>{{status_profile[x.status]}}</td><td><a href="/campaigns/contacts/{{x.id}}">Details</a></td>
-    <td>{{x.latest}}&nbsp; <a href="/campaigns/contacts/{{x.id}}/chats/{{x.chats[0].id}}">view</a> </td></tr>
-%end
-   </tfoot>
-</table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Acquisition channel</th>
+        <th># of correspondence</th>
+        <th>Status</th>
+        <th>full details</th>
+        <th>Latest</th>
+    </tr>
+    </thead>
+    <tfoot>
+    %from model import status_profile,PROFILE_OWNER
+    %for y in items:
+    %for x in y.profiles:
+    %if x.profile_type != PROFILE_OWNER:
+    <tr>
+        <td>{{x.name}}</td>
+        %if x.campaign:
+        <td>{{x.campaign[0].desc}}</td>
+        %else:
+        <td>no campaign</td>
+        %end
+        <td>{{len(x.chats)}} &nbsp; <a href="/campaigns/contacts/{{x.id}}/chats">View All</a></td>
+        <td>{{status_profile[x.status]}}</td>
+        <td><a href="/campaigns/contacts/{{x.id}}">Details</a></td>
+        %if x.chats:
+        <td>{{x.latest}}&nbsp; <a href="/campaigns/contacts/{{x.id}}/chats/{{x.chats[0].id}}">view</a></td>
+        %else:
+         <td>none&nbsp; </td>
+        %end
+    </tr>
+    %end
+    %end
+    %end
+    </tfoot>
+</table><br/>
+<a href="/campaigns/contacts/new">Create New Contacts</a>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-  <script> $( "input:submit, a, button,input:reset").button();</script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script> $("input:submit, a, button,input:reset").button();</script>
 </body>
 </html>

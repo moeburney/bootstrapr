@@ -1,8 +1,9 @@
 ::-webkit-input-placeholder {
-    color:    black;
+    color: black;
     font-weight: bold;
 }
+
 :-moz-placeholder {
-    color:    red;
+    color: red;
     font-weight: bold;
 }

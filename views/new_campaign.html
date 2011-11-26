@@ -4,12 +4,12 @@
     <title>Add Campaign</title>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
 
 </head>
 <body>
 %include common_menu
-<form id="cform" action="/src/campaignsigns" method="POST">
+<form id="cform" action="/campaigns" method="POST">
     <h3>General: </h3>
     <input type="text" id="desc" name="desc" placeholder="Name of Campaign" required/><br/><br/>
     <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
@@ -21,8 +21,8 @@
     <input type=text id="goal" name="goal" placeholder="Goals of Campaign"/><br/>
     <input type="text" id='datepick' placeholder="Start date"><br/>
     <input type="text" id='datepick1' placeholder="End date">
-    <input type='hidden' id="sts" name="sts" /><br/>
-    <input type='hidden' id="ets" name="ets" /><br/>
+    <input type='hidden' id="sts" name="sts"/><br/>
+    <input type='hidden' id="ets" name="ets"/><br/>
     <hr>
     <h3>Expenses: </h3>
     <input type="hidden" id="expenses" name="expenses"/>
@@ -48,7 +48,7 @@
     <hr>
     <h3>Misc: </h3>
     <textarea name="notes" placeholder="Notes about the marketing blast" rows="6" cols="50"/></textarea><br/>
-     <label for="status">Status of Blast: </label> <select id="status" name="status">
+    <label for="status">Status of Blast: </label> <select id="status" name="status">
     %for x in status:
     <option value="{{status.index(x)}}">{{x}}</option>
     %end
@@ -57,7 +57,8 @@
     <h3>Custom Data: </h3>
     <input type=hidden id="attrs" name="attrs"/>
     <a id="addData">Add Custom Data</a><br/><br/>
-    <input type="submit" id="submit" value="Create Campaign"/> <input type="reset" value="Clear"/> <a href="/src/campaignsigns">Home</a><br/>
+    <input type="submit" id="submit" value="Create Campaign"/> <input type="reset" value="Clear"/> <a
+        href="/campaigns">Home</a><br/>
 </form>
 </form>
 <div id="dialog-form" title="Create new data">
@@ -82,15 +83,15 @@
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script type="text/javascript"> $(function() {
 
-		$( "#datepick" ).datepicker({
-			altField: "#sts",
-			altFormat: "@"
-            
-		});
-	$( "#datepick1" ).datepicker({
-			altField: "#ets",
-			altFormat: "@"
-		});
+    $("#datepick").datepicker({
+        altField: "#sts",
+        altFormat: "@"
+
+    });
+    $("#datepick1").datepicker({
+        altField: "#ets",
+        altFormat: "@"
+    });
 
 
     var expenselist = 0
@@ -113,29 +114,28 @@
             }
         }
     })
-    var collectExpenseData = function(){
-       var expense = {}
-       $("#expenselist input[id^=expense-]").each(function(item,value){
-           var name = $(value).attr('name')
-           var type = $(value).attr('id').split('-')[1]
-           var id = $(value).attr('id').split('-')[2]
+    var collectExpenseData = function() {
+        var expense = {}
+        $("#expenselist input[id^=expense-]").each(function(item, value) {
+            var name = $(value).attr('name')
+            var type = $(value).attr('id').split('-')[1]
+            var id = $(value).attr('id').split('-')[2]
 
-           var value = $(value).attr('value')
-           if(!expense.hasOwnProperty(name)){
-              expense[name] = {}
-           }
-           if(type === "name"){
-           expense[name]['quantity'] = value
-           }
-           if(type === "val"){
-               expense[name]['unitexpense'] = value
-           }
-       })
+            var value = $(value).attr('value')
+            if (!expense.hasOwnProperty(name)) {
+                expense[name] = {}
+            }
+            if (type === "name") {
+                expense[name]['quantity'] = value
+            }
+            if (type === "val") {
+                expense[name]['unitexpense'] = value
+            }
+        })
 
-       var stringi = JSON.stringify(expense)
-        alert(stringi)
-       $("#expenses").val(stringi)
-   }
+        var stringi = JSON.stringify(expense)
+        $("#expenses").val(stringi)
+    }
 
 
     var gainslist = 0
@@ -160,29 +160,28 @@
         }
     })
 // create json of gains {item :{ quantity : no. , dollarperunit : $$}
-   var collectGainsData = function(){
-       var gains = {}
-       $("#gainslist input[id^=gains-]").each(function(item,value){
-           var name = $(value).attr('name')
-           var type = $(value).attr('id').split('-')[1]
-           var id = $(value).attr('id').split('-')[2]
-           
-           var value = $(value).attr('value')
-           if(!gains.hasOwnProperty(name)){
-              gains[name] = {}
-           }
-           if(type === "name"){
-           gains[name]['quantity'] = value
-           }
-           if(type === "val"){
-               gains[name]['unitgain'] = value
-           }
-       })
+    var collectGainsData = function() {
+        var gains = {}
+        $("#gainslist input[id^=gains-]").each(function(item, value) {
+            var name = $(value).attr('name')
+            var type = $(value).attr('id').split('-')[1]
+            var id = $(value).attr('id').split('-')[2]
 
-       var stringi = JSON.stringify(gains)
-       alert(stringi)
-       $("#gains").val(stringi)
-   }
+            var value = $(value).attr('value')
+            if (!gains.hasOwnProperty(name)) {
+                gains[name] = {}
+            }
+            if (type === "name") {
+                gains[name]['quantity'] = value
+            }
+            if (type === "val") {
+                gains[name]['unitgain'] = value
+            }
+        })
+
+        var stringi = JSON.stringify(gains)
+        $("#gains").val(stringi)
+    }
 
 
     $("input:submit, a, button,input:reset").button();
@@ -197,8 +196,8 @@
 
         return true;
     })
-    var collectCustomData = function(){
-          var attrs = {}
+    var collectCustomData = function() {
+        var attrs = {}
         $("input[id^=custom-]").each(function(item, value) {
             attrs[$(value).attr('placeholder')] = $(value).val()
         })
@@ -213,8 +212,8 @@
         buttons: {
             "Create custom data": function() {
                 var name = $("#name").val().replace(/\s+/g, "")
-                var label = "<label for='custom-"+name+"'>"+name+": </label>"
-                $("#addData").before(label+"<input value='' id=custom-" + name + " required placeholder=" + name + " type=" + $("#dtype").val() + "/><br/>");
+                var label = "<label for='custom-" + name + "'>" + name + ": </label>"
+                $("#addData").before(label + "<input value='' id=custom-" + name + " required placeholder=" + name + " type=" + $("#dtype").val() + "/><br/>");
                 $(this).dialog("close");
             },
             Cancel: function() {

@@ -8,10 +8,27 @@
 </head>
 <body>
 %include common_menu
+%from model import PROFILE_OWNER
 <form action="/campaigns/contacts" method="POST">
+    %if not campaigns and type != PROFILE_OWNER:
+    <script type="text/javascript">
+    <!--
+    alert("No Campaigns created by user -- redirecting")
+    window.location.href = "/campaigns"
+//-->
+    </script>
+    %end
+    %if type == PROFILE_OWNER:
+    <h3>Register new user</h3>
+    %end
     <input type="text" id="name" name="name" placeholder="Name" required/><br/>
-    <input type="email" id="pemail" name="pemail" placeholder="Email" required /><br/>
-    <label for="campaign_id"/>Came From Marketing Blast: </label><select id="campaign_id" name="campaign_id" >
+    %if type == PROFILE_OWNER:
+    <input type="password" id='passwd' name="passwd" placeholder="Enter Password" required/><br/>
+    %end
+    <input type="email" id="pemail" name="pemail" placeholder="Email" required/><br/>
+    <input type='hidden' id='ptype' name="ptype" value="{{type}}"/>
+    %if not (type == PROFILE_OWNER):
+    <label for="campaign_id"/>Came From Marketing Blast: </label><select id="campaign_id" name="campaign_id">
     %for x in campaigns:
     <option value="{{x.id}}">{{x.desc}}</option>
     %end
@@ -21,10 +38,11 @@
     <option value="{{pstatuses.index(x)}}">{{x}}</option>
     %end
 </select><br/>
+    %end
     <input type="submit" name="Create Contact"/> <input type="reset" name="Clear"/>
 </form>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-  <script> $( "input:submit, a, button,input:reset").button();</script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script> $("input:submit, a, button,input:reset").button();</script>
 </body>
 </html>

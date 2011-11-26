@@ -1,5 +1,5 @@
 import unittest
-from model import init_db, campaign, campaign_type, ctypes
+from model import init_db, campaign, campaign_type, ctypes, drop_all
 
 __author__ = 'rohan'
 
@@ -8,6 +8,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(True, True)
 
     def test_campaigns(self):
+        drop_all()
         db = init_db()
         new_campaign = campaign(desc="Test Campaign")
         db.add(new_campaign)

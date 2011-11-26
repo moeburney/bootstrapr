@@ -2,15 +2,16 @@ import json
 import re
 import string
 import uuid
-from sqlalchemy.engine import create_engine
+from sqlalchemy.engine import create_engine, reflection
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.schema import Column, Table, ForeignKey
+from sqlalchemy.schema import Column, Table, ForeignKey, DropTable, DropConstraint, ForeignKeyConstraint, MetaData
 from sqlalchemy.sql.expression import and_
 from sqlalchemy.types import Integer, String, BigInteger, Float
 import time
+
 engine = create_engine("mysql://rohan:gotohome@localhost/ron")
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
@@ -73,7 +74,8 @@ class campaign(Base):
     attrs = Column(String(1000), default="{}") # a json for all other unique attributes
     notes = Column(String(1000))
     status = Column(Integer, default=STATUS_PENDING)
-    profiles = relationship("profile", backref=backref("campaigns",order_by="profile.id"), cascade="all", secondary=link_table)
+    profiles = relationship("profile", backref="campaigns",
+                            secondary=link_table)
 
     @hybrid_property
     def outgo(self):
@@ -119,7 +121,7 @@ class campaign(Base):
             return obj.desc
         return None
 
-    def update(self, params):
+    def update(self, params,session):
         self.id = params.get('id') if 'id' in params else self.id
         self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
         self.desc = params.get('desc') if 'desc' in params else self.desc
@@ -132,20 +134,22 @@ class campaign(Base):
         self.attrs = params.get('attrs') if "attrs" in params else self.attrs
         self.notes = params.get('notes') if "notes" in params else self.notes
         self.status = params.get('status') if "status" in params else self.status
-        print "update blast " + self.desc
-        db = init_db()
+        
+        db = session
         db.add(self)
         db.commit()
 
-    def delete(self):
-        db = init_db()
+    def delete(self,session):
+        db = session
         db.delete(self)
         db.commit()
-    def save(self):
-        db = init_db()
+
+    def save(self,session):
+        db = session
         db.add(self)
         db.commit()
-        
+
+
 class chat(Base):
     __tablename__ = "chats"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -156,9 +160,10 @@ class chat(Base):
     type = Column(Integer)
     details = Column(String(500), default="{}")
     parent_chat = Column(Integer, ForeignKey(id))
-    replies = relationship("chat", backref=backref("topic", remote_side=[id],order_by="chat.ts"))
+    profile = relationship("profile",back_populates="chats")
+    replies = relationship("chat", backref=backref("topic", remote_side=[id], order_by="chat.ts"))
 
-    def update(self, params):
+    def update(self, params,session):
         self.id = params.get('id') if 'id' in params else self.id
         self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
         self.profile_id = params.get('profile_id') if 'profile_ud' in params else self.profile_id
@@ -167,27 +172,32 @@ class chat(Base):
         self.type = params.get('type') if 'type' in params else self.type
         self.parent_chat = params.get('parent_chat') if 'parent_chat' in params else self.parent_chat
         self.details = params.get('details') if 'details' in params else self.details
-   
-    def delete(self):
-        db = init_db()
-        db.delete(self)
-        db.commit()
-    def save(self):
-        db = init_db()
+        db = session
         db.add(self)
         db.commit()
+    def delete(self,session):
+        db = session
+        db.delete(self)
+        db.commit()
+
+    def save(self,session):
+        db = session
+        db.add(self)
+        db.commit()
+
 
 class profile(Base):
     __tablename__ = "profiles"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     uuid = Column(String(100), default=uuid.uuid4().__str__())
     name = Column(String(200), default="New Profile")
-    pemail = Column(String(50),unique=True)
-    campaign_id = Column(Integer, ForeignKey(campaign.id))
+    passwd = Column(String(20),default=None)
+    pemail = Column(String(50), unique=True)
     profile_type = Column(Integer, default=PROFILE_CONTACT, nullable=False)
     status = Column(Integer, default=STATUS_PROFILE_PROSPECT)
-    chats = relationship("chat", backref="profile", cascade="all, delete-orphan")
-    campaign = relationship("campaign",backref="campaign")
+    chats = relationship("chat", back_populates="profile", cascade="all, delete-orphan")
+    campaign = relationship("campaign", backref="profile",secondary=link_table)
+
     @hybrid_property
     def latest(self):
         if self.chats:
@@ -196,26 +206,28 @@ class profile(Base):
             if words:
                 return string.join(words[:4])
 
-    def update(self, params):
+    def update(self, params,session):
         self.id = params.get('id') if 'id' in params else self.id
         self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
         self.name = params.get('name') if 'name' in params else self.name
+        self.passwd = params.get('passwd') if 'passwd' in params else self.passwd
         self.pemail = params.get('pemail') if 'pemail' in params else self.pemail
-        self.campaign_id = params.get('campaign_id') if 'campaign_id' in params else self.campaign_id
         self.profile_type = params.get('ptype') if 'ptype' in params else self.profile_type
         self.status = params.get('pstatus') if 'pstatus' in params else self.status
-        db = init_db()
+        db = session
         db.add(self)
         db.commit()
 
-    def delete(self):
-        db = init_db()
+    def delete(self,session):
+        db = session
         db.delete(self)
         db.commit()
-    def save(self):
-        db = init_db()
+
+    def save(self,session):
+        db = session
         db.add(self)
         db.commit()
+
 
 def profile_get_all():
     return init_db().query(profile).all()
@@ -230,15 +242,61 @@ def profile_get_one(profile_id, profile_uuid=None):
         profile.id == profile_id).first() if profile_uuid is None else init_db().query(profile).filter(
         and_(profile.id == profile_id, profile.uuid == profile_uuid)).first()
 
+def drop_all():
+    conn = engine.connect()
+
+# the transaction only applies if the DB supports
+# transactional DDL, i.e. Postgresql, MS SQL Server
+    trans = conn.begin()
+
+    inspector = reflection.Inspector.from_engine(engine)
+
+# gather all data first before dropping anything.
+# some DBs lock after things have been dropped in
+# a transaction.
+
+    metadata = MetaData()
+
+    tbs = []
+    all_fks = []
+
+    for table_name in inspector.get_table_names():
+        fks = []
+        for fk in inspector.get_foreign_keys(table_name):
+            if not fk['name']:
+                continue
+            fks.append(
+                ForeignKeyConstraint((),(),name=fk['name'])
+                )
+        t = Table(table_name,metadata,*fks)
+        tbs.append(t)
+        all_fks.extend(fks)
+
+    for fkc in all_fks:
+        conn.execute(DropConstraint(fkc))
+
+    for table in tbs:
+        conn.execute(DropTable(table))
+
+    trans.commit()
+
 def init_db(transactional=False):
-    Base.metadata.create_all(engine)
-    
     session = Session()
-    if((session.query(campaign_type).count()) <=0):
+    Base.metadata.create_all(engine)
+    if((session.query(campaign_type).count()) <= 0):
         for temp in ctypes:
             session.add(campaign_type(desc=temp))
-        session.commit()
+    if((session.query(profile).filter(profile.name=="admin").count())<=0):
+        obj = profile()
+        obj.name = "admin"
+        obj.passwd = "admin"
+        obj.pemail = "admin@admin.com"
+        obj.profile_type = PROFILE_OWNER
+        session.add(obj)
+    session.commit()
     return session
+
+
 def get_all():
     return init_db().query(campaign).all()
 
@@ -246,6 +304,7 @@ def get_all():
 def get_one(id, uuid=None):
     return init_db().query(campaign).filter(campaign.id == id).first() if uuid is None else init_db().query(
         campaign).filter(and_(campaign.id == id, campaign.uuid == uuid)).first()
+
 
 def campaign_type_get_all(exclude=None):
     return init_db().query(campaign_type).filter(campaign_type.id != exclude)

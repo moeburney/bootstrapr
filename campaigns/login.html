@@ -3,32 +3,32 @@
 <head>
     <title>Login</title>
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
 
 </head>
 <body>
 <form id='cform' action="/campaigns/login" method='POST'>
     <label for="user">User: </label> <input type="text" placeholder="User" name="user" id="user" required/><br/>
-    <label for="passwd">Password: </label><input type="password" placeholder="Password" name="passwd" id="passwd" required/><br/>
+    <label for="passwd">Password: </label><input type="password" placeholder="Password" name="passwd" id="passwd"
+                                                 required/><br/>
     <span id="error" style="color:red"></span>
-    <input type="submit" value="Login"/>
+    <input type="submit" value="Login"/> <a href="/campaigns/contacts/new?type=owner">Create new user</a>
 </form>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-<script> $( "input:submit, a, button,input:reset").button();
-if(getParams("err") == "invalid"){
+<script> $("input:submit, a, button,input:reset").button();
+if (getParams("err") == "invalid") {
     $("#error").text("Invalid user or passwd")
 }
-function getParams(name)
-{
-  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  var regexS = "[\\?&]" + name + "=([^&#]*)";
-  var regex = new RegExp(regexS);
-  var results = regex.exec(window.location.href);
-  if(results == null)
-    return "";
-  else
-    return decodeURIComponent(results[1].replace(/\+/g, " "));
+function getParams(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regexS = "[\\?&]" + name + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(window.location.href);
+    if (results == null)
+        return "";
+    else
+        return decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 

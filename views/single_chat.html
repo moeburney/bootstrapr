@@ -17,11 +17,12 @@
     %end
     %end
 </select><br/><br/>
-    <textarea name="content" placeholder="Details about the Correspondence" rows="6" cols="50" />{{item.content}}</textarea><br/>
-    <input type='submit' value="Create Chat"/> <input type="reset" value="Clear"/>
+    <textarea name="content" placeholder="Details about the Correspondence" rows="6"
+              cols="50"/>{{item.content}}</textarea><br/>
+    <input type='submit' value="Create Chat"/> <input type="reset" value="Clear"/> <a href="/campaigns/contacts/{{item.profile.id}}/chats">All Chats</a>
 </form>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-  <script> $( "input:submit, a, button,input:reset").button();</script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script> $("input:submit, a, button,input:reset").button();</script>
 </body>
 </html>
