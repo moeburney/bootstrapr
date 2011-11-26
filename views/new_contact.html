@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Contact</title>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
+</head>
+<body>
+<form action="/campaigns/contacts" method="POST">
+    <input type="text" id="name" name="name" placeholder="Name" required/><br/>
+    <input type="email" id="pemail" name="pemail" placeholder="Email" required /><br/>
+    <label for="campaign_id"/>Came From Marketing Blast: </label><select id="campaign_id" name="campaign_id" >
+    %for x in campaigns:
+    <option value="{{x.id}}">{{x.desc}}</option>
+    %end
+</select><br/>
+    <label for="pstatus"/>Type: </label><select id="pstatus" name="pstatus">
+    %for x in pstatuses:
+    <option value="{{pstatuses.index(x)}}">{{x}}</option>
+    %end
+</select><br/>
+    <input type="submit" name="Create Contact"/> <input type="reset" name="Clear"/>
+</form>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script type="text/javascript"> $(function() {
+    $("input:submit, a, button,input:reset").button();
+});
+</script>
+</body>
+</html>

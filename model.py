@@ -1,5 +1,4 @@
 import json
-import profile
 import uuid
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -12,6 +11,7 @@ from sqlalchemy.types import Integer, String, BigInteger, Float
 import time
 engine = create_engine("mysql://rohan:gotohome@localhost/ron")
 Base = declarative_base()
+Session = sessionmaker(bind=engine)
 profile_types = ['owner', 'contact']
 status_profile = ['Prospect', 'Subscriber', 'Paid user']
 STATUS_PROFILE_PROSPECT = 0
@@ -71,7 +71,7 @@ class campaign(Base):
     attrs = Column(String(1000), default="{}") # a json for all other unique attributes
     notes = Column(String(1000))
     status = Column(Integer, default=STATUS_PENDING)
-    profiles = relationship("profile", backref="campaigns", cascade="all", secondary=link_table)
+    profiles = relationship("profile", backref=backref("campaigns",order_by="profile.id"), cascade="all", secondary=link_table)
 
     @hybrid_property
     def outgo(self):
@@ -139,7 +139,11 @@ class campaign(Base):
         db = init_db()
         db.delete(self)
         db.commit()
-
+    def save(self):
+        db = init_db()
+        db.add(self)
+        db.commit()
+        
 class chat(Base):
     __tablename__ = "chats"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -150,8 +154,7 @@ class chat(Base):
     type = Column(Integer)
     details = Column(String(500), default="{}")
     parent_chat = Column(Integer, ForeignKey(id))
-    replies = relationship("chat", backref=backref("topic", remote_side=[id]))
-    
+    replies = relationship("chat", backref=backref("topic", remote_side=[id],order_by="chat.ts"))
 
     def update(self, params):
         self.id = params.get('id') if 'id' in params else self.id
@@ -162,24 +165,30 @@ class chat(Base):
         self.type = params.get('type') if 'type' in params else self.type
         self.parent_chat = params.get('parent_chat') if 'parent_chat' in params else self.parent_chat
         self.details = params.get('details') if 'details' in params else self.details
-
+   
     def delete(self):
         db = init_db()
         db.delete(self)
         db.commit()
-
+    def save(self):
+        db = init_db()
+        db.add(self)
+        db.commit()
 
 class profile(Base):
     __tablename__ = "profiles"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     uuid = Column(String(100), default=uuid.uuid4().__str__())
     name = Column(String(200), default="New Profile")
-    pemail = Column(String(50))
+    pemail = Column(String(50),unique=True)
     campaign_id = Column(Integer, ForeignKey(campaign.id))
     profile_type = Column(Integer, default=PROFILE_CONTACT, nullable=False)
     status = Column(Integer, default=STATUS_PROFILE_PROSPECT)
     chats = relationship("chat", backref="profile", cascade="all, delete-orphan")
-
+    campaign = relationship("campaign",backref="campaign")
+    @hybrid_property
+    def latest(self):
+        return "lol"
     def update(self, params):
         self.id = params.get('id') if 'id' in params else self.id
         self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
@@ -188,7 +197,6 @@ class profile(Base):
         self.campaign_id = params.get('campaign_id') if 'campaign_id' in params else self.campaign_id
         self.profile_type = params.get('ptype') if 'ptype' in params else self.profile_type
         self.status = params.get('pstatus') if 'pstatus' in params else self.status
-        print "update profile " + self.desc
         db = init_db()
         db.add(self)
         db.commit()
@@ -197,7 +205,10 @@ class profile(Base):
         db = init_db()
         db.delete(self)
         db.commit()
-
+    def save(self):
+        db = init_db()
+        db.add(self)
+        db.commit()
 
 def profile_get_all():
     return init_db().query(profile).all()
@@ -214,23 +225,27 @@ def profile_get_one(profile_id, profile_uuid=None):
 
 def init_db(transactional=False):
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
+    
     session = Session()
+    if((session.query(campaign_type).count()) <=0):
+        for temp in ctypes:
+            session.add(campaign_type(desc=temp))
+        session.commit()
     return session
 def get_all():
     return init_db().query(campaign).all()
 
 
 def get_one(id, uuid=None):
-    return init_db().query(campaign).filter(campaign.campaign.id == id).first() if uuid is None else init_db().query(
-        campaign.campaign).filter(and_(campaign.campaign.id == id, campaign.campaign.uuid == uuid)).first()
+    return init_db().query(campaign).filter(campaign.id == id).first() if uuid is None else init_db().query(
+        campaign).filter(and_(campaign.id == id, campaign.uuid == uuid)).first()
 
 def campaign_type_get_all(exclude=None):
-    return init_db().query(campaign.campaign_type).filter(campaign.campaign_type.id != exclude)
+    return init_db().query(campaign_type).filter(campaign_type.id != exclude)
 
 
 def campaign_type_get_one(typeid):
-    return init_db().query(campaign.campaign_type).filter(campaign.campaign_type.id == typeid).first()
+    return init_db().query(campaign_type).filter(campaign_type.id == typeid).first()
 
 if __name__ == "__main__":
     init_db()

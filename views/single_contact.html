@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Contact</title>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
+</head>
+<body>
+<form action="/campaigns/contacts/{{obj.id}}" method="POST">
+    <input type="hidden" id="uuid" name="uuid" value="{{obj.uuid}}"/>
+    <input type="text" id="name" name="name" placeholder="Name" required value="{{obj.name}}"/><br/>
+    <input type="email" id="pemail" name="pemail" placeholder="Email" required value="{{obj.pemail}}"/><br/>
+    <label for="campaign_id"/>Marketing Blast: </label>{{campaign_name.desc}}<br/><br/>
+    <label for="pstatus"/>Type: </label><select id="pstatus" name="pstatus">
+    <option value="{{obj.status}}">{{pstatuses[obj.status]}}</option>
+    %for x in pstatuses:
+    %if pstatuses.index(x) != obj.status:
+    <option value="{{pstatuses.index(x)}}">{{x}}</option>
+    %end
+    %end
+</select><br/>
+    <input type="submit" value="Update"/><a href="/campaigns/contacts"/>Contacts</a>
+</form>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script type="text/javascript"> $(function() {
+    $("input:submit, a, button,input:reset").button();
+});
+</script>
+
+</body>
+</html>

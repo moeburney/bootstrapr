@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>{{items[0].desc if items else "welcome"}}</title>
+<title>welcome</title>
       <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="../campaigns/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css" />
 
 </head>
 %import datetime
@@ -15,7 +15,7 @@
 <tfoot>
 %for x in items:
 % import json
-%from models.campaign import status
+%from model import status
 % uattrs = json.loads(x.attrs)
 <tr><td>{{x.desc}}</td><td>{{x.incomes}}</td><td>{{x.outgo}}</td><td>{{x.roi}}</td>
 <td>{{datetime.datetime.fromtimestamp(x.startTs/1000)}}</td><td>{{datetime.datetime.fromtimestamp(x.endTs/1000)}}</td>
@@ -25,7 +25,7 @@
 %end
 </tfoot>
 </table>
-<a href="/campaigns/new">Create New Campaign</a>  <a href="/campaigns/logout">Logout</a>
+<a href="/campaigns/new">Create New Campaign</a> <a href="/campaigns/contacts/new">Create New Contacts</a>  <a href="/campaigns/logout">Logout</a>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
   <script> $( "input:submit, a, button,input:reset").button();

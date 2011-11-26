@@ -1,6 +1,5 @@
 import unittest
-from model import campaign, campaign_type, ctypes
-from utils import init_db
+from model import init_db, campaign, campaign_type, ctypes
 
 __author__ = 'rohan'
 
@@ -27,7 +26,7 @@ class MyTestCase(unittest.TestCase):
         new_campaign = campaign(desc="Test Campaign")
 
     def test_profile(self):
-        return true
+        return True
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit chat</title>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
+</head>
+<body>
+<form id='cform' action="/campaigns/contacts/{{profile_id}}/chats/{{item.id}}" method="POST">
+    <label for="type"/>Type: </label> <select id="type" name="type">
+    <option value="{{item.type}}">{{chat_type[item.type]}}</option>
+    %for x in chat_type:
+    %if chat_type.index(x) != item.type:
+    <option value="{{chat_type.index(x)}}">{{x}}</option>
+    %end
+    %end
+</select><br/><br/>
+    <textarea name="content" placeholder="Details about the Correspondence" rows="6" cols="50" />{{item.content}}</textarea><br/>
+    <input type='submit' value="Create Chat"/> <input type="reset" value="Clear"/>
+</form>
+
+</body>
+</html>

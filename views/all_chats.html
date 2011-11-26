@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>All chat</title>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/></head>
+<body>
+<table border="1">
+<thead> <tr><th>Contact</th><th>Time</th><th>Type of Correspondence</th><th>Content</th></tr></thead>
+<tfoot>
+%from model import chat_type
+%import datetime
+%for x in items.chats:
+<tr><td>{{x.profile.name}}</td><td>{{datetime.datetime.fromtimestamp(x.ts)}}</td><td>{{chat_type[x.type]}}</td><td>{{x.content}}</td><td><a href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}">Edit</a> &nbsp;&nbsp; <a href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}/reply">Reply</a></tr>
+%end
+   </tfoot>
+</table>
+
+</body>
+</html>

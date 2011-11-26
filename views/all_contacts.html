@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css" />
+</head>
+<body>
+<table border="1">
+<thead> <tr><th>Name</th><th>Acquisition channel</th><th># of correspondence</th><th>Status</th><th>full details</th><th>Latest</th></tr></thead>
+<tfoot>
+%from model import status_profile
+%for x in items:
+<tr><td>{{x.name}}</td><td>{{x.campaign.desc}}</td><td>{{len(x.chats)}}</td><td>{{status_profile[x.status]}}</td><td><a href="/campaigns/contacts/{{x.id}}">Details</a></td><td>{{x.latest}}</td></tr>
+%end
+   </tfoot>
+</table>
+</body>
+</html>
