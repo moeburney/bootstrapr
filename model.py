@@ -1,4 +1,6 @@
 import json
+import re
+import string
 import uuid
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -188,7 +190,12 @@ class profile(Base):
     campaign = relationship("campaign",backref="campaign")
     @hybrid_property
     def latest(self):
-        return "lol"
+        if self.chats:
+            contents = self.chats[0].content # chats are already sorted by time stamp
+            words = re.findall(r'\w+', contents)
+            if words:
+                return string.join(words[:4])
+
     def update(self, params):
         self.id = params.get('id') if 'id' in params else self.id
         self.uuid = params.get('uuid') if 'uuid' in params else self.uuid

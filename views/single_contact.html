@@ -7,6 +7,8 @@
     <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
 </head>
 <body>
+%include common_menu
+%include common_contact_menu cid=obj.id
 <form action="/campaigns/contacts/{{obj.id}}" method="POST">
     <input type="hidden" id="uuid" name="uuid" value="{{obj.uuid}}"/>
     <input type="text" id="name" name="name" placeholder="Name" required value="{{obj.name}}"/><br/>
@@ -20,7 +22,7 @@
     %end
     %end
 </select><br/>
-    <input type="submit" value="Update"/><a href="/campaigns/contacts"/>Contacts</a>
+    <input type="submit" value="Update"/>
 </form>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>

@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
 </head>
 <body>
+%include common_menu
 <form action="/campaigns/contacts" method="POST">
     <input type="text" id="name" name="name" placeholder="Name" required/><br/>
     <input type="email" id="pemail" name="pemail" placeholder="Email" required /><br/>
@@ -23,10 +24,7 @@
     <input type="submit" name="Create Contact"/> <input type="reset" name="Clear"/>
 </form>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
-<script type="text/javascript"> $(function() {
-    $("input:submit, a, button,input:reset").button();
-});
-</script>
+  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+  <script> $( "input:submit, a, button,input:reset").button();</script>
 </body>
 </html>
