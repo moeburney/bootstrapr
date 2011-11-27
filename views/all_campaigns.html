@@ -46,8 +46,11 @@
     %end
     </tfoot>
 </table>
-<a href="/campaigns/new">Create New Campaign</a> &nbsp; <a href="/campaigns/contacts/new">Create New Contacts</a> &nbsp; <a href="/campaigns/contacts/new?type=owner">Create New User</a> &nbsp; <a
-        href="/campaigns/logout">Logout</a>
+<a href="/campaigns/new">Create New Campaign</a> &nbsp; <a href="/campaigns/contacts/new">Create New Contacts</a> &nbsp; <a href="/campaigns/contacts/new?type=owner">Create New User</a> &nbsp;
+%if not isoauth:
+<a href="/campaigns/start_oauth">Sync With Gmail</a> &nbsp;
+%end
+<a href="/campaigns/logout">Logout</a>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script> $("input:submit, a, button,input:reset").button();

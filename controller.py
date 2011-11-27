@@ -8,7 +8,7 @@ from beaker.middleware import SessionMiddleware
 import bottle
 from sqlalchemy.sql.expression import and_
 import time
-from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails
+from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL
 import oauth2 as oauth
 __author__ = 'rohan'
 
@@ -30,10 +30,9 @@ CONSUMER_KEY = "anonymous"
 CONSUMER_SECRET = "anonymous"
 SCOPE = "https://mail.google.com/"
 RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
-
-xoauth_displayname = "Rohan's Test"
 consumer = oauth.Consumer(CONSUMER_KEY,CONSUMER_SECRET)
 client = oauth.Client(consumer)
+xoauth_displayname = "Rohan's Test"
 session_opts = {
     'session.auto': True,
     'session.timeout': 3000,
@@ -87,9 +86,14 @@ def login(user, passwd):
 
 @get(url_root+'/start_oauth')
 def handler():
+    global client
     url = REQUEST_TOKEN_URL+'?scope=%s&oauth_callback=%s&xoauth_displayname=%s' % (SCOPE, CALLBACK_URL, xoauth_displayname)
     resp, content = client.request(url, 'GET')
-    oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
+    try:
+        oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
+    except:
+        client = oauth.Client(consumer)
+        bottle.redirect(url_root+'/start_oauth')
     print "request token "+oauth_token
     oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
     print "request secret "+oauth_token_secret
@@ -145,8 +149,9 @@ def handler():
     db = init_db()
     sess = get_session()
     objs = db.query(campaign).filter(campaign.profiles.any(id=sess['uid'])).all()
-
-    return dict(items=objs)
+    curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    isoauth = True if (curr_prof.oauth_token is not None and curr_prof.oauth_token_secret is not None) else False
+    return dict(items=objs,isoauth=isoauth)
 
 
 @get(url_root + '/:id')
@@ -284,17 +289,21 @@ def handler(cid):
     if oauth_token is None:
         bottle.redirect(url_root+'/start_oauth')
     contact = db.query(profile).filter(profile.id==cid).first()
-
+    last_email = db.query(chat).filter(and_(chat.profile_id==cid,chat.type==CHAT_EMAIL)).order_by(chat.ts).first()
     if not contact:
         bottle.redirect(url_root_contacts)
-    since = (contact.chats[0].ts).strftime("%d-%b-%Y") if contact.chats else datetime.date(time.time()).strftime("%d-%b-%Y")
+    if last_email:
+        since = (datetime.datetime.fromtimestamp(last_email.ts)).strftime("%d-%b-%Y")
+    else:
+        since = "1-JAN-1970"
     token = oauth.Token(oauth_token,oauth_token_secret)
     conn = imaplib.IMAP4_SSL('imap.googlemail.com')
     conn.debug = 2
     conn.authenticate((RESOURCE_URL % email), consumer, token)
     conn.select("INBOX",readonly=True)
-    emails(conn,contact_email,since=since)
-    return dict()
+    print "geting email for "+contact.pemail
+    emails(conn,contact.pemail,since=since)
+    bottle.redirect(url_root_contacts+'/%s'%(cid))
 
 @get(url_root_contacts + '/:cid/chats')
 @auth()

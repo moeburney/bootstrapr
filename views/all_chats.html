@@ -21,7 +21,7 @@
     %from model import chat_type,CHAT_EMAIL,CHAT_SOCIALMEDIA
     %import datetime
     %chatts = [x for x in items.chats if x.type not in [CHAT_EMAIL,CHAT_SOCIALMEDIA]]
-    %for x in items.chatts:
+    %for x in chatts:
     <tr>
         <td>{{x.profile.name}}</td>
         <td>{{datetime.datetime.fromtimestamp(x.ts)}}</td>
@@ -33,8 +33,8 @@
     %end
     </tfoot>
 </table><br/><br/>
-<a href="/campaigns/contacts/{{cid}}/chats/new">New chat</a>
-<h3>Emails</h3>
+<a href="/campaigns/contacts/{{cid}}/chats/new">New chat with {{items.name}}</a>
+<h3><a href="/campaigns/contacts/{{cid}}/getemails">Get Emails</a></h3>
 <table border="1">
     <thead>
     <tr>
@@ -48,12 +48,12 @@
     %from model import chat_type,CHAT_EMAIL,CHAT_SOCIALMEDIA
     %import datetime
     %chattts = [x for x in items.chats if x.type in [CHAT_EMAIL,CHAT_SOCIALMEDIA] and x.parent_chat is None]
-    %for x in items.chattts:
+    %for x in chattts:
     <tr>
         <td>{{x.subject}}</td>
         <td>{{datetime.datetime.fromtimestamp(x.ts)}}</td>
         <td>{{x.content}}</td>
-        <td><a href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}">Go</a></td>
+        <td><a href="#">Go</a></td>
     </tr>
     %end
     </tfoot>

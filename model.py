@@ -43,10 +43,10 @@ VIEWS = 3
 INTERACTIONS = 4
 REVENUE = 5
 chat_type = ['Phone', 'Physical']
-CHAT_CALL = 2
-CHAT_PHYSICAL = 3
-CHAT_EMAIL=0
-CHAT_SOCIALMEDIA=1
+CHAT_CALL = 0
+CHAT_PHYSICAL = 1
+CHAT_EMAIL=2
+CHAT_SOCIALMEDIA=3
 class campaign_type(Base):
     __tablename__ = "campaign_types"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -157,9 +157,9 @@ class chat(Base):
     profile_id = Column(Integer, ForeignKey("profiles.id"))
     ts = Column(Float, default=time.time())
     subject = Column(String(50))
-    content = Column(String(1000), default="No Comments")
+    content = Column(String(10000), default="No Comments")
     type = Column(Integer)
-    details = Column(String(1000), default="{}")
+    details = Column(String(15000), default="{}")
     parent_chat = Column(Integer, ForeignKey(id))
     profile = relationship("profile",back_populates="chats")
     replies = relationship("chat", backref=backref("topic", remote_side=[id], order_by="chat.ts"))
@@ -196,7 +196,10 @@ class chat(Base):
 def makechatfromemail(email):
     temp = chat()
     temp.details = json.dumps(email)
-    temp.ts = time.mktime(time.strptime(email['date'],"%a, %d %b %Y %H:%M:%S "+email['date'].split(" ")[-1]))
+    if email['date'] is not None:
+        stemp = email['date'].split(" ")[-1]
+        temp.ts = time.mktime(time.strptime(email['date'],"%a, %d %b %Y %H:%M:%S "+stemp))
+    
     temp.content = email['body']
     temp.subject = email['subject']
     temp.type = CHAT_EMAIL
@@ -333,7 +336,7 @@ def campaign_type_get_one(typeid):
 def emails(conn,email,since="1-JAN-1970"):
     status, response = conn.search(None, '(OR FROM "%s" TO "%s" SENTSINCE %s)' % (email,email,since))
     email_ids = [e_id for e_id in response[0].split()]
-    print 'Number of emails from %s: %i. IDs: %s' % (email, len(email_ids), email_ids)
+    print 'Number of emails from %s: since %s %i. IDs: %s' % (email, since,len(email_ids), email_ids)
     
     db = init_db()
     contact = db.query(profile).filter(profile.pemail==email).first()
