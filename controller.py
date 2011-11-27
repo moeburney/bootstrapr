@@ -112,7 +112,7 @@ def handler(id):
 def handler(id):
     sess = get_session()
     db = init_db()
-    obj = db.query(campaign).fiter(and_(campaign.profiles.any(id=sess['uid']),campaign.id==id)).first()
+    obj = db.query(campaign).filter(and_(campaign.profiles.any(id=sess['uid']),campaign.id==id)).first()
     if(obj is None):
         bottle.redirect(url_root)
     obj.delete(session=db)
@@ -150,7 +150,7 @@ def handler():
 def handler(id):
     db = init_db()
     sess = get_session()
-    obj = db.query(campaign).fiter(and_(campaign.profiles.any(id=sess['uid']),campaign.id==id,campaign.uuid == request.POST.get('uuid'))).first()
+    obj = db.query(campaign).filter(and_(campaign.profiles.any(id=sess['uid']),campaign.id==id,campaign.uuid == request.POST.get('uuid'))).first()
     if(obj is None):
         bottle.redirect(url_root)
     obj.update(request.POST,session=db)
