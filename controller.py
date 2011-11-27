@@ -1,9 +1,11 @@
 import json
+import urllib
+import urlparse
 from beaker.middleware import SessionMiddleware
 import bottle
 from sqlalchemy.sql.expression import and_
-from model import campaign, status, expensetypes, gaintypes, get_one, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, PROFILE_OWNER, PROFILE_CONTACT
-
+from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, PROFILE_OWNER, PROFILE_CONTACT
+import oauth2 as oauth
 __author__ = 'rohan'
 
 url_root = "/campaigns"
@@ -14,6 +16,22 @@ from bottle import route, request, get, post, view
 
 bottle.debug(True)
 
+
+##OAUTH STUFF
+REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
+ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
+AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
+CALLBACK_URL = 'http://localhost/campaigns/oauth'
+CONSUMER_KEY = "anonymous"
+CONSUMER_SECRET = "anonymous"
+SCOPE = "https://mail.google.com/"
+RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
+
+xoauth_displayname = "Rohan's Test"
+oauth_token = None
+oauth_token_secret = None
+consumer = oauth.Consumer(CONSUMER_KEY,CONSUMER_SECRET)
+client = oauth.Client(consumer)
 session_opts = {
     'session.auto': True,
     'session.timeout': 180,
@@ -64,6 +82,46 @@ def login(user, passwd):
         get_session()['loggedin'] = True
     else:
         get_session().delete()
+
+@get(url_root+'/start_oauth')
+def handler():
+    url = REQUEST_TOKEN_URL+'?scope=%s&oauth_callback=%s&xoauth_displayname=%s' % (SCOPE, CALLBACK_URL, xoauth_displayname)
+    resp, content = client.request(url, 'GET')
+    oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
+    print "request token "+oauth_token
+    oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
+    print "request secret "+oauth_token_secret
+    client.token = oauth.Token(oauth_token, oauth_token_secret)
+    if resp['status'] == '200':
+        print 'OAuthGetRequestToken OK'
+    else:
+        print 'OAuthGetRequestToken status: %s' % resp['status']
+        print content
+    url = AUTHORIZATION_URL+'?hd=default&oauth_token=%s' % urllib.quote_plus(oauth_token)
+    bottle.redirect(url)
+
+    return
+
+@route(url_root+'/oauth',Methods=['GET','POST'])
+def handler():
+    url = ACCESS_TOKEN_URL+'?oauth_token=%s&oauth_verifier=%s' % (request.GET.get('oauth_token'),request.GET.get('oauth_verifier'))
+    resp, content = client.request(url, 'GET')
+    if resp['status'] == '200':
+        print 'OAuthGetAccessToken OK'
+        db = init_db()
+        curr_uid = get_session()['uid']
+        curr_profile = db.query(profile).filter(profile.id==curr_uid).first()
+        if curr_profile:
+            curr_profile.oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
+            curr_profile.oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
+            curr_profile.save(session=db)
+            
+        print content
+    else:
+        print 'OAuthGetAccessToken status: %s' % resp['status']
+        print content
+    return request.params
+
 
 
 @post(url_root + '/login')
@@ -293,3 +351,5 @@ def handler(cid, id):
     obj.update(request.POST,session=db)
     
     return bottle.redirect(url_root_contacts + '/%s/chats/%s' % (cid, id))
+
+

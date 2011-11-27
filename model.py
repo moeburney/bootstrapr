@@ -197,7 +197,8 @@ class profile(Base):
     status = Column(Integer, default=STATUS_PROFILE_PROSPECT)
     chats = relationship("chat", back_populates="profile", cascade="all, delete-orphan")
     campaign = relationship("campaign", backref="profile",secondary=link_table)
-
+    oauth_token = Column(String(55))
+    oauth_token_secret = Column(String(55))
     @hybrid_property
     def latest(self):
         if self.chats:
