@@ -1,10 +1,14 @@
+import string
+import datetime
+import oauth2.clients.imap as imaplib
 import json
 import urllib
 import urlparse
 from beaker.middleware import SessionMiddleware
 import bottle
 from sqlalchemy.sql.expression import and_
-from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, PROFILE_OWNER, PROFILE_CONTACT
+import time
+from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails
 import oauth2 as oauth
 __author__ = 'rohan'
 
@@ -28,13 +32,11 @@ SCOPE = "https://mail.google.com/"
 RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
 
 xoauth_displayname = "Rohan's Test"
-oauth_token = None
-oauth_token_secret = None
 consumer = oauth.Consumer(CONSUMER_KEY,CONSUMER_SECRET)
 client = oauth.Client(consumer)
 session_opts = {
     'session.auto': True,
-    'session.timeout': 180,
+    'session.timeout': 3000,
     'session.type': 'ext:database',
     'session.url': 'mysql://rohan:gotohome@localhost/ron',
     'session.key': 'campaignsession',
@@ -115,13 +117,11 @@ def handler():
             curr_profile.oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
             curr_profile.oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
             curr_profile.save(session=db)
-            
-        print content
+        bottle.redirect(url_root)
     else:
         print 'OAuthGetAccessToken status: %s' % resp['status']
         print content
-    return request.params
-
+        bottle.redirect(url_root)
 
 
 @post(url_root + '/login')
@@ -276,6 +276,25 @@ def handler(cid):
     obj.update(request.POST,session=db)
     bottle.redirect(url_root_contacts + '/' + cid)
 
+@get(url_root_contacts+'/:cid/getemails')
+@auth()
+def handler(cid):
+    db = init_db()
+    oauth_token,oauth_token_secret,email = db.query(profile.oauth_token,profile.oauth_token_secret,profile.pemail).filter(profile.id==get_session()['uid']).first()
+    if oauth_token is None:
+        bottle.redirect(url_root+'/start_oauth')
+    contact = db.query(profile).filter(profile.id==cid).first()
+
+    if not contact:
+        bottle.redirect(url_root_contacts)
+    since = (contact.chats[0].ts).strftime("%d-%b-%Y") if contact.chats else datetime.date(time.time()).strftime("%d-%b-%Y")
+    token = oauth.Token(oauth_token,oauth_token_secret)
+    conn = imaplib.IMAP4_SSL('imap.googlemail.com')
+    conn.debug = 2
+    conn.authenticate((RESOURCE_URL % email), consumer, token)
+    conn.select("INBOX",readonly=True)
+    emails(conn,contact_email,since=since)
+    return dict()
 
 @get(url_root_contacts + '/:cid/chats')
 @auth()

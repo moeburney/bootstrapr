@@ -1,3 +1,4 @@
+import email
 import json
 import re
 import string
@@ -41,12 +42,11 @@ SALES = 2
 VIEWS = 3
 INTERACTIONS = 4
 REVENUE = 5
-chat_type = ['email', 'social media', 'call', 'physical']
-CHAT_EMAIL = 0
-CHAT_SOCIAL_MEDIA = 1
+chat_type = ['Phone', 'Physical']
 CHAT_CALL = 2
 CHAT_PHYSICAL = 3
-
+CHAT_EMAIL=0
+CHAT_SOCIALMEDIA=1
 class campaign_type(Base):
     __tablename__ = "campaign_types"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -156,9 +156,10 @@ class chat(Base):
     uuid = Column(String(100), default=uuid.uuid4().__str__())
     profile_id = Column(Integer, ForeignKey("profiles.id"))
     ts = Column(Float, default=time.time())
-    content = Column(String(500), default="No Comments")
+    subject = Column(String(50))
+    content = Column(String(1000), default="No Comments")
     type = Column(Integer)
-    details = Column(String(500), default="{}")
+    details = Column(String(1000), default="{}")
     parent_chat = Column(Integer, ForeignKey(id))
     profile = relationship("profile",back_populates="chats")
     replies = relationship("chat", backref=backref("topic", remote_side=[id], order_by="chat.ts"))
@@ -172,6 +173,7 @@ class chat(Base):
         self.type = params.get('type') if 'type' in params else self.type
         self.parent_chat = params.get('parent_chat') if 'parent_chat' in params else self.parent_chat
         self.details = params.get('details') if 'details' in params else self.details
+        self.subject = params.get('subject') if 'subject' in params else self.subject
         db = session
         db.add(self)
         db.commit()
@@ -184,7 +186,21 @@ class chat(Base):
         db = session
         db.add(self)
         db.commit()
-
+"""mail['id'] = msg['Message-ID'].strip().strip("<").strip(">")
+        mail['to'] = msg['to'].split('<')[1].strip('>')
+        mail['from'] = msg['from'].split('<')[1].strip('>')
+        mail['date'] = msg['date']
+        mail['body'] = body
+        mail['subject'] = msg['subject']
+        mail['parent'] = msg['In-Reply-To'].strip().strip("<").strip(">") if "In-Reply-To" in msg else None"""
+def makechatfromemail(email):
+    temp = chat()
+    temp.details = json.dumps(email)
+    temp.ts = time.mktime(time.strptime(email['date'],"%a, %d %b %Y %H:%M:%S "+email['date'].split(" ")[-1]))
+    temp.content = email['body']
+    temp.subject = email['subject']
+    temp.type = CHAT_EMAIL
+    return temp
 
 class profile(Base):
     __tablename__ = "profiles"
@@ -313,6 +329,66 @@ def campaign_type_get_all(exclude=None):
 
 def campaign_type_get_one(typeid):
     return init_db().query(campaign_type).filter(campaign_type.id == typeid).first()
+
+def emails(conn,email,since="1-JAN-1970"):
+    status, response = conn.search(None, '(OR FROM "%s" TO "%s" SENTSINCE %s)' % (email,email,since))
+    email_ids = [e_id for e_id in response[0].split()]
+    print 'Number of emails from %s: %i. IDs: %s' % (email, len(email_ids), email_ids)
+    
+    db = init_db()
+    contact = db.query(profile).filter(profile.pemail==email).first()
+    for x in email_ids:
+        currmail = get_email(conn,x)
+        currchat = makechatfromemail(currmail)
+        for old in contact.chats:
+            if old.type is CHAT_EMAIL:
+                obj = json.loads(old.details)
+                if obj['id'] == currmail['parent']:
+                    old.replies.append(currchat)
+                    continue
+                if obj['subject'] == currmail['subject']:
+                    old.replies.append(currchat)
+                    continue
+            old.save(session=db)
+            currchat.save(session=db)
+            contact.chats.append(currchat)
+            contact.save(session=db)
+    return
+
+
+
+
+
+
+    return emails
+def get_email(conn,email_id):
+    mail = {}
+    _, response = conn.fetch(email_id, '(RFC822)')
+    msg = email.message_from_string(response[0][1])
+    body = get_first_text_part(msg)
+    try:
+        mail['id'] = msg['Message-ID'].strip().strip("<").strip(">")
+        mail['to'] = msg['to'].split('<')[1].strip('>')
+        mail['from'] = msg['from'].split('<')[1].strip('>')
+        mail['date'] = msg['date']
+        mail['body'] = body
+        mail['subject'] = msg['subject']
+        mail['parent'] = msg['In-Reply-To'].strip().strip("<").strip(">") if "In-Reply-To" in msg else None
+    except:
+        mail = None
+    return mail
+def get_first_text_part(msg):
+    maintype = msg.get_content_type()
+    if maintype =="multipart/mixed" or maintype=="multipart/alternative":
+        for part in msg.get_payload():
+            if part.get_content_type() == "text/plain":
+                return part.get_payload()
+            else:
+                for x in part.get_payload():
+                    if x.get_content_type() == "text/plain":
+                        return x.get_payload()
+    elif maintype == 'text/plain':
+        return msg.get_payload()
 
 if __name__ == "__main__":
     init_db()
