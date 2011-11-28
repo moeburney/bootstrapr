@@ -25,7 +25,7 @@ bottle.debug(True)
 GOOGLE_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
 GOOGLE_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
 GOOGLE_AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
-GOOGLE_CALLBACK_URL = 'http://localhost/campaigns/g/oauth'
+GOOGLE_CALLBACK_URL = 'http://k4nu.com/campaigns/g/oauth'
 GOOGLE_CONSUMER_KEY = "anonymous"
 GOOGLE_CONSUMER_SECRET = "anonymous"
 GOOGLE_SCOPE = "https://mail.google.com/"
@@ -38,12 +38,14 @@ GOOGLE_xoauth_displayname = "kkr"
 
 
 ##TWITTER OAUTH
-TWITTER_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
-TWITTER_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
-TWITTER_AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
-TWITTER_CALLBACK_URL = 'http://localhost/campaigns/t/oauth'
-TWITTER_CONSUMER_KEY = "anonymous"
-TWITTER_CONSUMER_SECRET = "anonymous"
+TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
+TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
+TWITTER_AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
+TWITTER_CALLBACK_URL = 'http://k4nu.com/campaigns/t/oauth'
+TWITTER_CONSUMER_KEY = "jL2l985ZHPYiRC5I4IOlzg"
+TWITTER_CONSUMER_SECRET = "hcVxPzghKsZNyHDy8YSzTyiFhIJ7S30Ajw7KX4Bas"
+TWITTER_consumer = oauth.Consumer(TWITTER_CONSUMER_KEY,TWITTER_CONSUMER_SECRET)
+TWITTER_client = oauth.Client(TWITTER_consumer)
 
 
 
@@ -100,6 +102,49 @@ def login(user, passwd):
         get_session()['loggedin'] = True
     else:
         get_session().delete()
+
+@get(url_root+'/t/start_oauth')
+def handler():
+    global TWITTER_client
+    url = TWITTER_REQUEST_TOKEN_URL+'?oauth_callback=%s' % (TWITTER_CALLBACK_URL)
+    resp, content = TWITTER_client.request(url, 'GET')
+    try:
+        oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
+    except:
+        TWITTER_client = oauth.Client(TWITTER_consumer)
+        bottle.redirect(url_root)
+    print "request token "+oauth_token
+    oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
+    print "request secret "+oauth_token_secret
+    TWITTER_client.token = oauth.Token(oauth_token, oauth_token_secret)
+    if resp['status'] == '200':
+        print 'OAuthGetRequestToken OK'
+    else:
+        print 'OAuthGetRequestToken status: %s' % resp['status']
+        print content
+    url = TWITTER_AUTHORIZATION_URL+'?oauth_token=%s' % urllib.quote_plus(oauth_token)
+    bottle.redirect(url)
+
+    return
+
+@route(url_root+'/t/oauth',Methods=['GET','POST'])
+def handler():
+    url = TWITTER_ACCESS_TOKEN_URL+'?oauth_token=%s&oauth_verifier=%s' % (request.GET.get('oauth_token'),request.GET.get('oauth_verifier'))
+    resp, content = TWITTER_client.request(url, 'GET')
+    if resp['status'] == '200':
+        print 'OAuthGetAccessToken OK'
+        db = init_db()
+        curr_uid = get_session()['uid']
+        curr_profile = db.query(profile).filter(profile.id==curr_uid).first()
+        if curr_profile:
+            curr_profile.t_oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
+            curr_profile.t_oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
+            curr_profile.save(session=db)
+        bottle.redirect(url_root)
+    else:
+        print 'OAuthGetAccessToken status: %s' % resp['status']
+        print content
+        bottle.redirect(url_root)
 
 @get(url_root+'/g/start_oauth')
 def handler():
@@ -312,7 +357,7 @@ def handler(cid):
 def handler(cid):
     db = init_db()
     g_oauth_token,g_oauth_token_secret,email = db.query(profile.g_oauth_token,profile.g_oauth_token_secret,profile.pemail).filter(profile.id==get_session()['uid']).first()
-    if oauth_token is None:
+    if g_oauth_token is None:
         bottle.redirect(url_root+'/g/start_oauth')
     contact = db.query(profile).filter(profile.id==cid).first()
     last_email = db.query(chat).filter(and_(chat.profile_id==cid,chat.type==CHAT_EMAIL)).order_by(chat.ts).first()
@@ -326,8 +371,9 @@ def handler(cid):
     conn = imaplib.IMAP4_SSL('imap.googlemail.com')
     conn.debug = 3
     try:
-        conn.authenticate((RESOURCE_URL % email), GOOGLE_consumer, token)
-    except:
+        conn.authenticate((GOOGLE_RESOURCE_URL % email), GOOGLE_consumer, token)
+    except Exception as e:
+        print e
         bottle.redirect(url_root+'/g/start_oauth')
     conn.select("INBOX",readonly=True)
     print "geting email for "+contact.pemail

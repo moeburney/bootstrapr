@@ -1,5 +1,6 @@
 import email
 import json
+import pickle
 import re
 import string
 import uuid
@@ -266,7 +267,7 @@ class profile(Base):
     g_oauth_token = Column(String(55))
     g_oauth_token_secret = Column(String(55))
     t_oauth_token = Column(String(55))
-    t_oauth_secret = Column(String(55))
+    t_oauth_token_secret = Column(String(55))
     twitter= Column(String(21))
     @hybrid_property
     def latest(self):
@@ -397,9 +398,12 @@ def emails(conn, email, since="1-JAN-1970"):
         if currmail is not None:
             print "adding mail "+currmail['subject']
             mail.append(currmail)
+
     mail.reverse()
+    output = open('/home/rohan/data.pkl', 'wb')
+    pickle.dump(mail, output)
     for y in mail:
-        print "=======######## GOt email "+(y['subject'] if 'subject' in y else "NO SUBJECT") +"  mid "+(y['id'] if 'id' in y else "NO ID") + "  parent id "+(y['parent'] if y['parent'] is not None else "NO PARENT")
+        print "=======######## GOt email "+(y['subject'] if 'subject' in y else "NO SUBJECT") +"  mid "+(y['id'] if 'id' in y else "NO ID") + "  parent id "+(y['parent'] if ('parent' in y and y['parent'] is not None) else "NO PARENT")
         db = init_db()
         contact = db.query(profile).filter(profile.pemail == email).first()
         currchat = makechatfromemail(y)
@@ -411,10 +415,12 @@ def emails(conn, email, since="1-JAN-1970"):
             continue
         contact.chats.sort(key=lambda x:x.ts)
         for old in contact.chats:
+            if old['id'] == y['id']:
+                continue
             if old.type == CHAT_EMAIL:
                 obj = json.loads(old.details)
-                print "OLD email "+(obj['subject'] if 'subject' in obj else "NO SUBJECT") +"  mid "+(obj['id'] if 'id' in obj else "NO ID" )+ "  parent id "+(obj['parent'] if obj['parent'] is not None else "NO PARENT")
-                if obj['id'] == y['parent']:
+                print "OLD email "+(obj['subject'] if 'subject' in obj else "NO SUBJECT") +"  mid "+(obj['id'] if 'id' in obj else "NO ID" )+ "  parent id "+(obj['parent'] if ('parent' in obj and  obj['parent'] is not None) else "NO PARENT")
+                if obj['id'] == (y['parent'] if 'parent' in y else ""):
                     print "EMAIL " + y['id'] + " is reply to " + old['id']
                     old.replies.append(currchat)
                     old.save(session=db)
@@ -433,13 +439,18 @@ def get_email(conn, email_id):
     _, response = conn.fetch(email_id, '(RFC822)')
     msg = email.message_from_string(response[0][1])
     body = get_first_text_part(msg)
-    mail['id'] = msg['Message-ID'].strip().strip("<").strip(">")
-    mail['to'] = msg['to'].split('<')[1].strip('>')
-    mail['from'] = msg['from'].split('<')[1].strip('>')
+    if "<" in msg['Message-ID']:
+        mail['id'] = msg['Message-ID'].strip().strip("<").strip(">")
+    if "<" in msg['to']:
+        mail['to'] = msg['to'].split('<')[1].strip('>')
+    if "<" in msg['from']:
+        mail['from'] = msg['from'].split('<')[1].strip('>')
     mail['date'] = msg['date']
     mail['body'] = body
     mail['subject'] = msg['subject']
-    mail['parent'] = msg['In-Reply-To'].strip().strip("<").strip(">") if "In-Reply-To" in msg else None
+    if msg['parent'] is not None:
+        if "<" in msg['parent']:
+            mail['parent'] = msg['In-Reply-To'].strip().strip("<").strip(">") if "In-Reply-To" in msg else None
     return mail
 
 
