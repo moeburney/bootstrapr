@@ -16,6 +16,7 @@
         <th>Status</th>
         <th>full details</th>
         <th>Latest</th>
+        <th>Feedback</th>
     </tr>
     </thead>
     <tfoot>
@@ -30,7 +31,7 @@
         %else:
         <td>no campaign</td>
         %end
-        <td>{{len(x.chats)}} &nbsp; <a href="/campaigns/contacts/{{x.id}}/chats">View All</a> &nbsp; </td>
+        <td>{{len(x.chats)}} &nbsp; <a href="/campaigns/contacts/{{x.id}}/chats">View all</a> &nbsp; </td>
         <td>{{status_profile[x.status]}}</td>
         <td><a href="/campaigns/contacts/{{x.id}}">Details</a></td>
         %if x.chats:
@@ -38,6 +39,7 @@
         %else:
          <td>none&nbsp; </td>
         %end
+        <td>{{len(x.feedbacks}} &nbsp; <a href="/campaigns/contacts/{{x.id}}/feedbacks">View all</a> </td>
     </tr>
     %end
     %end

@@ -8,7 +8,7 @@ from beaker.middleware import SessionMiddleware
 import bottle
 from sqlalchemy.sql.expression import and_
 import time
-from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL
+from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback
 import oauth2 as oauth
 __author__ = 'rohan'
 
@@ -22,17 +22,34 @@ bottle.debug(True)
 
 
 ##OAUTH STUFF
-REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
-ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
-AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
-CALLBACK_URL = 'http://localhost/campaigns/oauth'
-CONSUMER_KEY = "anonymous"
-CONSUMER_SECRET = "anonymous"
-SCOPE = "https://mail.google.com/"
-RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
-consumer = oauth.Consumer(CONSUMER_KEY,CONSUMER_SECRET)
-client = oauth.Client(consumer)
-xoauth_displayname = "Rohan's Test"
+GOOGLE_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
+GOOGLE_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
+GOOGLE_AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
+GOOGLE_CALLBACK_URL = 'http://localhost/campaigns/g/oauth'
+GOOGLE_CONSUMER_KEY = "anonymous"
+GOOGLE_CONSUMER_SECRET = "anonymous"
+GOOGLE_SCOPE = "https://mail.google.com/"
+GOOGLE_RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
+GOOGLE_consumer = oauth.Consumer(GOOGLE_CONSUMER_KEY,GOOGLE_CONSUMER_SECRET)
+GOOGLE_client = oauth.Client(GOOGLE_consumer)
+GOOGLE_xoauth_displayname = "kkr"
+
+
+
+
+##TWITTER OAUTH
+TWITTER_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
+TWITTER_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
+TWITTER_AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
+TWITTER_CALLBACK_URL = 'http://localhost/campaigns/t/oauth'
+TWITTER_CONSUMER_KEY = "anonymous"
+TWITTER_CONSUMER_SECRET = "anonymous"
+
+
+
+
+
+
 session_opts = {
     'session.auto': True,
     'session.timeout': 3000,
@@ -84,42 +101,42 @@ def login(user, passwd):
     else:
         get_session().delete()
 
-@get(url_root+'/start_oauth')
+@get(url_root+'/g/start_oauth')
 def handler():
-    global client
-    url = REQUEST_TOKEN_URL+'?scope=%s&oauth_callback=%s&xoauth_displayname=%s' % (SCOPE, CALLBACK_URL, xoauth_displayname)
-    resp, content = client.request(url, 'GET')
+    global GOOGLE_client
+    url = GOOGLE_REQUEST_TOKEN_URL+'?scope=%s&oauth_callback=%s&xoauth_displayname=%s' % (GOOGLE_SCOPE, GOOGLE_CALLBACK_URL, GOOGLE_xoauth_displayname)
+    resp, content = GOOGLE_client.request(url, 'GET')
     try:
         oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
     except:
-        client = oauth.Client(consumer)
-        bottle.redirect(url_root+'/start_oauth')
+        GOOGLE_client = oauth.Client(GOOGLE_consumer)
+        bottle.redirect(url_root)
     print "request token "+oauth_token
     oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
     print "request secret "+oauth_token_secret
-    client.token = oauth.Token(oauth_token, oauth_token_secret)
+    GOOGLE_client.token = oauth.Token(oauth_token, oauth_token_secret)
     if resp['status'] == '200':
         print 'OAuthGetRequestToken OK'
     else:
         print 'OAuthGetRequestToken status: %s' % resp['status']
         print content
-    url = AUTHORIZATION_URL+'?hd=default&oauth_token=%s' % urllib.quote_plus(oauth_token)
+    url = GOOGLE_AUTHORIZATION_URL+'?hd=default&oauth_token=%s' % urllib.quote_plus(oauth_token)
     bottle.redirect(url)
 
     return
 
-@route(url_root+'/oauth',Methods=['GET','POST'])
+@route(url_root+'/g/oauth',Methods=['GET','POST'])
 def handler():
-    url = ACCESS_TOKEN_URL+'?oauth_token=%s&oauth_verifier=%s' % (request.GET.get('oauth_token'),request.GET.get('oauth_verifier'))
-    resp, content = client.request(url, 'GET')
+    url = GOOGLE_ACCESS_TOKEN_URL+'?oauth_token=%s&oauth_verifier=%s' % (request.GET.get('oauth_token'),request.GET.get('oauth_verifier'))
+    resp, content = GOOGLE_client.request(url, 'GET')
     if resp['status'] == '200':
         print 'OAuthGetAccessToken OK'
         db = init_db()
         curr_uid = get_session()['uid']
         curr_profile = db.query(profile).filter(profile.id==curr_uid).first()
         if curr_profile:
-            curr_profile.oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
-            curr_profile.oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
+            curr_profile.g_oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
+            curr_profile.g_oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
             curr_profile.save(session=db)
         bottle.redirect(url_root)
     else:
@@ -150,8 +167,9 @@ def handler():
     sess = get_session()
     objs = db.query(campaign).filter(campaign.profiles.any(id=sess['uid'])).all()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    isoauth = True if (curr_prof.oauth_token is not None and curr_prof.oauth_token_secret is not None) else False
-    return dict(items=objs,isoauth=isoauth)
+    isoauth = True if (curr_prof.g_oauth_token is not None and curr_prof.g_oauth_token_secret is not None) else False
+    istoauth = True if (curr_prof.t_oauth_token is not None and curr_prof.t_oauth_token_secret is not None) else False
+    return dict(items=objs,isoauth=isoauth,istoauth=istoauth)
 
 
 @get(url_root + '/:id')
@@ -285,9 +303,9 @@ def handler(cid):
 @auth()
 def handler(cid):
     db = init_db()
-    oauth_token,oauth_token_secret,email = db.query(profile.oauth_token,profile.oauth_token_secret,profile.pemail).filter(profile.id==get_session()['uid']).first()
+    g_oauth_token,g_oauth_token_secret,email = db.query(profile.g_oauth_token,profile.g_oauth_token_secret,profile.pemail).filter(profile.id==get_session()['uid']).first()
     if oauth_token is None:
-        bottle.redirect(url_root+'/start_oauth')
+        bottle.redirect(url_root+'/g/start_oauth')
     contact = db.query(profile).filter(profile.id==cid).first()
     last_email = db.query(chat).filter(and_(chat.profile_id==cid,chat.type==CHAT_EMAIL)).order_by(chat.ts).first()
     if not contact:
@@ -296,14 +314,60 @@ def handler(cid):
         since = (datetime.datetime.fromtimestamp(last_email.ts)).strftime("%d-%b-%Y")
     else:
         since = "1-JAN-1970"
-    token = oauth.Token(oauth_token,oauth_token_secret)
+    token = oauth.Token(g_oauth_token,g_oauth_token_secret)
     conn = imaplib.IMAP4_SSL('imap.googlemail.com')
-    conn.debug = 2
-    conn.authenticate((RESOURCE_URL % email), consumer, token)
+    conn.debug = 3
+    try:
+        conn.authenticate((RESOURCE_URL % email), GOOGLE_consumer, token)
+    except:
+        bottle.redirect(url_root+'/g/start_oauth')
     conn.select("INBOX",readonly=True)
     print "geting email for "+contact.pemail
     emails(conn,contact.pemail,since=since)
     bottle.redirect(url_root_contacts+'/%s'%(cid))
+
+@get(url_root_contacts + '/:cid/feedbacks')
+@auth()
+@view('all_feedbacks')
+def handler(cid):
+    db = init_db()
+    item = db.query(profile).filter(profile.id == cid).first()
+
+    return dict(items=item,cid=cid)
+@get(url_root_contacts + '/:cid/feedbacks/new')
+@auth()
+@view('new_feedback')
+def handler(cid):
+    return dict(profile_id=cid, feedback_type=FEEDBACK_TYPE)
+@post(url_root_contacts + '/:cid/feedbacks')
+@auth()
+def handle(cid):
+    db = init_db()
+    obj = feedback()
+    prof = db.query(profile).filter(profile.id == cid).first()
+    obj.update(request.POST,session=db)
+    if prof:
+        prof.feedbacks.append(obj)
+        prof.save(session=db)
+
+    bottle.redirect(url_root_contacts + '/' + cid + '/feedbacks/' + str(obj.id)) if obj else bottle.redirect(
+        url_root_contacts)
+@get(url_root_contacts + '/:cid/feedbacks/:id')
+@auth()
+@view("single_feedback")
+def handler(cid, id):
+    db = init_db()
+    obj = db.query(feedback).filter(feedback.id == id).first()
+    return dict(profile_id=cid, item=obj, feedback_type=FEEDBACK_TYPE)
+
+
+@post(url_root_contacts + '/:cid/feedbacks/:id')
+@auth()
+def handler(cid, id):
+    db = init_db()
+    obj = db.query(feedback).filter(feedback.id == id).first()
+    obj.update(request.POST,session=db)
+    return bottle.redirect(url_root_contacts + '/%s/feedbacks/%s' % (cid, id))
 
 @get(url_root_contacts + '/:cid/chats')
 @auth()
@@ -335,6 +399,23 @@ def handle(cid):
 
     bottle.redirect(url_root_contacts + '/' + cid + '/chats/' + str(obj.id)) if obj else bottle.redirect(
         url_root_contacts)
+@get(url_root_contacts + '/:cid/chats/:id')
+@auth()
+@view("single_chat")
+def handler(cid, id):
+    db = init_db()
+    obj = db.query(chat).filter(chat.id == id).first()
+    return dict(profile_id=cid, item=obj, chat_type=chat_type)
+
+
+@post(url_root_contacts + '/:cid/chats/:id')
+@auth()
+def handler(cid, id):
+    db = init_db()
+    obj = db.query(chat).filter(chat.id == id).first()
+    obj.update(request.POST,session=db)
+
+    return bottle.redirect(url_root_contacts + '/%s/chats/%s' % (cid, id))
 
 @get(url_root_contacts+'/:cid/chats/:id/reply')
 @auth()
@@ -344,6 +425,15 @@ def handler(cid,id):
     db = init_db()
     obj = db.query(chat).filter(chat.id==id).first()
     return dict(chat=obj)
+@get(url_root_contacts+'/:cid/chats/:id/email')
+@auth()
+@view("reply_email")
+def handler(cid,id):
+
+    db = init_db()
+    obj = db.query(chat).filter(chat.id==id).first()
+    return dict(chat=obj)
+
 @post(url_root_contacts+'/:cid/chats/:id/reply')
 @auth()
 def handler(cid,id):
@@ -362,22 +452,5 @@ def handler(cid,id):
     bottle.redirect(url_root_contacts+'/%s/chats/%s/reply' % (cid,id))
 
 
-@get(url_root_contacts + '/:cid/chats/:id')
-@auth()
-@view("single_chat")
-def handler(cid, id):
-    db = init_db()
-    obj = db.query(chat).filter(chat.id == id).first()
-    return dict(profile_id=cid, item=obj, chat_type=chat_type)
-
-
-@post(url_root_contacts + '/:cid/chats/:id')
-@auth()
-def handler(cid, id):
-    db = init_db()
-    obj = db.query(chat).filter(chat.id == id).first()
-    obj.update(request.POST,session=db)
-    
-    return bottle.redirect(url_root_contacts + '/%s/chats/%s' % (cid, id))
 
 

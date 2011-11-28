@@ -48,7 +48,10 @@
 </table>
 <a href="/campaigns/new">Create New Campaign</a> &nbsp; <a href="/campaigns/contacts/new">Create New Contacts</a> &nbsp; <a href="/campaigns/contacts/new?type=owner">Create New User</a> &nbsp;
 %if not isoauth:
-<a href="/campaigns/start_oauth">Sync With Gmail</a> &nbsp;
+<a href="/campaigns/g/start_oauth">Sync With Gmail</a> &nbsp;
+%end
+% if not istoauth:
+<a href="/campaigns/t/start_oauth">Sync With Twitter</a> &nbsp;
 %end
 <a href="/campaigns/logout">Logout</a>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>

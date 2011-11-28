@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add chat</title>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
+</head>
+<body>
+%include common_menu
+%from model import chat_type, CHAT_EMAIL
+%import datetime
+<hr/>
+<h4>{{chat.profile.name}}'s message on {{datetime.datetime.fromtimestamp(chat.ts)}}</h4>
+<p>Type : {{"Email" if chat.type == CHAT_EMAIL else "Social Media"}}</p>
+<p>Name : {{chat.profile.name}}</p>
+<p>Subject : {{chat.subject}}</p>
+<p>Message : {{chat.content}}</p>
+%for x in chat.replies:
+<hr/>
+<h4>Reply on {{datetime.datetime.fromtimestamp(x.ts)}}</h4>
+<p>Subject : {{x.subject}}</p>
+<p>Message : {{x.content}} &nbsp;&nbsp;  </p>
+%if x.replies:
+%for y in x.replies:
+<h5>Reply on {{datetime.datetime.fromtimestamp(y.ts)}}</h5>
+<p>Subject : {{y.subject}}</p>
+<p>Message : {{y.content}} &nbsp;&nbsp;  </p>
+%end
+%end
+
+%end
+<hr/>
+<h3>Reply</h3>
+<form id='cform' method="POST" action="/campaigns/contacts/{{chat.profile.id}}/chats/{{chat.id}}/reply">
+    <label for="type"/>Type: </label> <select id="type" name="type">
+    %for x in chat_type:
+    <option value="{{chat_type.index(x)}}">{{x}}</option>
+    %end
+</select><br/><br/>
+<textarea name="content" placeholder="your reply to the message" rows="6" cols="50"/></textarea><br/>
+    <input type='submit' value="Reply"/> <input type="reset" value="Clear"/>
+</form>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script> $("input:submit, a, button,input:reset").button();</script>
+
+</body>
+</html>

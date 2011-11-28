@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Feedback</title>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
+</head>
+<body>
+%include common_menu
+<table border="1">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type of Contact</th>
+        <th>Feedback Description</th>
+        <th>Type</th>
+        <th>Action</th>
+        <th>Date</th>
+        <th>Details</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tfoot>
+    %from model import chat_type,
+    %import datetime
+    %for x in item.feedbacks:
+    <tr>
+        <td>{{x.profile.name}}</td>
+        <td>{{x.profile.type}}</td>
+        <td>{{x.desc}}</td>
+        <td>{{x.type}}</td>
+        <td>{{x.action}}</td>
+        <td>{{datetime.datetime.fromtimestamp(x.ts)}}</td>
+        <td>details</td>
+        <td>{{x.status}}</td>
+        <td><a href="/campaigns/contacts/{{x.profile.id}}/feedbacks/{{x.id}}">Edit</a> &nbsp; </td>
+    </tr>
+    %end
+    </tfoot>
+</table><br/><br/>
+<a href="/campaigns/contacts/{{cid}}/feedbacks/new">New Feedback for {{items.name}}</a>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script> $("input:submit, a, button,input:reset").button();</script>
+</body>
+</html>

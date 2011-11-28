@@ -53,11 +53,13 @@
         <td>{{x.subject}}</td>
         <td>{{datetime.datetime.fromtimestamp(x.ts)}}</td>
         <td>{{x.content}}</td>
-        <td><a href="#">Go</a></td>
+        <td><a href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}/email">Go</a></td>
     </tr>
     %end
     </tfoot>
 </table><br/><br/>
+<h3><a href="/campaigns/contacts/{{cid}}/gettweets">Get Tweets</a></h3>
+
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script> $("input:submit, a, button,input:reset").button();</script>
