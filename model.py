@@ -388,9 +388,9 @@ def campaign_type_get_one(typeid):
     return init_db().query(campaign_type).filter(campaign_type.id == typeid).first()
 
 
-def emails(conn, email, since="1-JAN-1970"):
+def emails(conn, email, since="1970/01/01"):
     mail = []
-    status, response = conn.search(None, '(OR FROM "%s" TO "%s" SENTSINCE %s)' % (email, email, since))
+    status, response = conn.search(None, 'X-GM-RAW', "after:%s(from:%s OR to:%s)" % (since, email, email))
     email_ids = [e_id for e_id in response[0].split()]
     print 'Number of emails from %s: since %s %i. IDs: %s' % (email, since, len(email_ids), email_ids)
     for x in email_ids:
@@ -403,7 +403,6 @@ def emails(conn, email, since="1-JAN-1970"):
     output = open('/home/rohan/data.pkl', 'wb')
     pickle.dump(mail, output)
     for y in mail:
-        print "=======######## GOt email "+(y['subject'] if 'subject' in y else "NO SUBJECT") +"  mid "+(y['id'] if 'id' in y else "NO ID") + "  parent id "+(y['parent'] if ('parent' in y and y['parent'] is not None) else "NO PARENT")
         db = init_db()
         contact = db.query(profile).filter(profile.pemail == email).first()
         currchat = makechatfromemail(y)
@@ -413,46 +412,30 @@ def emails(conn, email, since="1-JAN-1970"):
             contact.save(session=db)
             print "save single email"
             continue
-        contact.chats.sort(key=lambda x:x.ts)
-        for old in contact.chats:
-            obj = json.loads(old.details)
-            if obj['id'] == y['id']:
-                print "$$ same email"
-                continue
-            if old.type == CHAT_EMAIL:
-
-                print "OLD email "+(obj['subject'] if 'subject' in obj else "NO SUBJECT") +"  mid "+(obj['id'] if 'id' in obj else "NO ID" )+ "  parent id "+(obj['parent'] if ('parent' in obj and  obj['parent'] is not None) else "NO PARENT")
-                if obj['id'] == (y['parent'] if 'parent' in y else ""):
-                    print "EMAIL " + y['id'] + " is reply to " + old['id']
-                    old.replies.append(currchat)
-                    old.save(session=db)
-                    currchat.save(session=db)
-                    contact.chats.append(currchat)
-                    contact.save(session=db)
-                    continue
-                currchat.save(session=db)
-                contact.chats.append(currchat)
-                contact.save(session=db)
+        currchat.save(session=db)
+        contact.chats.append(currchat)
+        contact.save(session=db)
     return
 
 
 def get_email(conn, email_id):
     mail = {}
+    _,gthread = conn.fetch(email_id,'X-GM-THRID')
+    gtid = re.search("X-GM-THRID (?P<gid>\d+)", gthread[0]).groupdict()['gid']
     _, response = conn.fetch(email_id, '(RFC822)')
     msg = email.message_from_string(response[0][1])
     body = get_first_text_part(msg)
-    if "<" in msg['Message-ID']:
-        mail['id'] = msg['Message-ID'].strip().strip("<").strip(">")
-    if "<" in msg['to']:
-        mail['to'] = msg['to'].split('<')[1].strip('>')
-    if "<" in msg['from']:
-        mail['from'] = msg['from'].split('<')[1].strip('>')
+    mail['gtid'] = gtid
+    mail['id'] = email.utils.unquote(msg['Message-ID'])
+    mail['to'] = email.utils.parseaddr(msg['to'])[1]
+    mail['from'] = email.utils.parseaddr(msg['from'])[1]
     mail['date'] = msg['date']
     mail['body'] = body
     mail['subject'] = msg['subject']
-    if msg['parent'] is not None:
-        if "<" in msg['parent']:
-            mail['parent'] = msg['In-Reply-To'].strip().strip("<").strip(">") if "In-Reply-To" in msg else None
+    if msg['In-Reply-To'] is not None:
+        mail['parent'] = email.utils.unquote(msg['In-Reply-To'])
+    print "%%%MAIL "
+    print mail
     return mail
 
 

@@ -1,0 +1,8 @@
+%for x in replies:
+%import datetime
+<hr/>
+<h4>Reply on {{datetime.datetime.fromtimestamp(x.ts)}}</h4>
+<p>Subject : {{x.subject}}</p>
+<p>Message : {{x.content.split("> ")[0]}} &nbsp;&nbsp;  </p>
+%include tree replies=x.replies
+

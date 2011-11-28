@@ -1,7 +1,7 @@
 import json
 import pickle
 import unittest
-from model import init_db, campaign, campaign_type, ctypes, drop_all, CHAT_EMAIL, makechatfromemail, profile
+from model import init_db, campaign, campaign_type, ctypes, drop_all, CHAT_EMAIL, makechatfromemail, profile, chat
 
 __author__ = 'rohan'
 
@@ -63,6 +63,15 @@ class MyTestCase(unittest.TestCase):
                     currchat.save(session=db)
                     contact.chats.append(currchat)
                     contact.save(session=db)
+        return True
+    def test_data(self):
+        db = init_db()
+        chats = db.query(chat)
+        for c in chats:
+            obj = json.loads(c.details)
+            if 'body' in obj:
+                if 'And about the gain and expenses' in obj['body']:
+                    print c.id
         return True
 if __name__ == '__main__':
     unittest.main()

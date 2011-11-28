@@ -1,3 +1,4 @@
+from _collections import defaultdict
 import string
 import datetime
 import oauth2.clients.imap as imaplib
@@ -6,7 +7,7 @@ import urllib
 import urlparse
 from beaker.middleware import SessionMiddleware
 import bottle
-from sqlalchemy.sql.expression import and_
+from sqlalchemy.sql.expression import and_, desc, asc
 import time
 from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback
 import oauth2 as oauth
@@ -364,12 +365,12 @@ def handler(cid):
     if not contact:
         bottle.redirect(url_root_contacts)
     if last_email:
-        since = (datetime.datetime.fromtimestamp(last_email.ts)).strftime("%d-%b-%Y")
+        since = (datetime.datetime.fromtimestamp(last_email.ts)).strftime("%Y/%m/%d")
     else:
-        since = "1-JAN-1970"
+        since = "1970/01/01"
     token = oauth.Token(g_oauth_token,g_oauth_token_secret)
     conn = imaplib.IMAP4_SSL('imap.googlemail.com')
-    conn.debug = 3
+    conn.debug = 4
     try:
         conn.authenticate((GOOGLE_RESOURCE_URL % email), GOOGLE_consumer, token)
     except Exception as e:
@@ -378,7 +379,7 @@ def handler(cid):
     conn.select("INBOX",readonly=True)
     print "geting email for "+contact.pemail
     emails(conn,contact.pemail,since=since)
-    bottle.redirect(url_root_contacts+'/%s'%(cid))
+    bottle.redirect(url_root_contacts+'/%s/emails'%(cid))
 
 @get(url_root_contacts + '/:cid/feedbacks')
 @auth()
@@ -479,14 +480,20 @@ def handler(cid,id):
     db = init_db()
     obj = db.query(chat).filter(chat.id==id).first()
     return dict(chat=obj)
-@get(url_root_contacts+'/:cid/chats/:id/email')
+@get(url_root_contacts+'/:cid/emails')
 @auth()
 @view("reply_email")
-def handler(cid,id):
+def handler(cid):
 
     db = init_db()
-    obj = db.query(chat).filter(chat.id==id).first()
-    return dict(chat=obj)
+    obj =db.query(profile).filter(profile.id==cid).first()
+
+    gtid = defaultdict(list)
+    for x in obj.chats:
+        js = json.loads(x.details)
+        if 'gtid' in js:
+            gtid[js['gtid']].append(x)
+    return dict(chats=gtid)
 
 @post(url_root_contacts+'/:cid/chats/:id/reply')
 @auth()
