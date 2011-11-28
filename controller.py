@@ -251,6 +251,14 @@ def handler():
     objs = db.query(campaign).filter(campaign.profiles.any(id=sess['uid'])).all()
     return dict(items=objs)
 
+@get(url_root+"/feedbacks")
+@auth()
+@view("all_custom_feedbacks")
+def handler():
+    sess = get_session()
+    db = init_db()
+    objs = db.query(campaign).filter(campaign.profiles.any(id=sess['uid'])).all()
+    return dict(items=objs)
 
 @get(url_root_contacts + "/new")
 @view("new_contact")
@@ -338,7 +346,7 @@ def handler(cid):
 @auth()
 @view('new_feedback')
 def handler(cid):
-    return dict(profile_id=cid, feedback_type=FEEDBACK_TYPE)
+    return dict(profile_id=cid, feedback_type=FEEDBACK_TYPE,status_type=status)
 @post(url_root_contacts + '/:cid/feedbacks')
 @auth()
 def handle(cid):
@@ -358,7 +366,7 @@ def handle(cid):
 def handler(cid, id):
     db = init_db()
     obj = db.query(feedback).filter(feedback.id == id).first()
-    return dict(profile_id=cid, item=obj, feedback_type=FEEDBACK_TYPE)
+    return dict(profile_id=cid, item=obj, feedback_type=FEEDBACK_TYPE,status_type=status)
 
 
 @post(url_root_contacts + '/:cid/feedbacks/:id')

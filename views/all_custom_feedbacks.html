@@ -24,7 +24,9 @@
     <tfoot>
     %from model import FEEDBACK_TYPE,status_profile,status
     %import datetime
-    %for x in items.feedbacks:
+    %for camp in items:
+    %for prof in camp.profiles:
+    %for x in prof.feedbacks:
     <tr>
         <td>{{x.profile.name}}</td>
         <td>{{status_profile[x.profile.profile_type]}}</td>
@@ -37,9 +39,10 @@
         <td><a href="/campaigns/contacts/{{x.profile.id}}/feedbacks/{{x.id}}">Edit</a> &nbsp; </td>
     </tr>
     %end
+    %end
+    %end
     </tfoot>
 </table><br/><br/>
-<a href="/campaigns/contacts/{{cid}}/feedbacks/new">New Feedback for {{items.name}}</a>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>

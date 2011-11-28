@@ -1,9 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Add Feedback</title>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
 </head>
 <body>
-
+%include common_menu
+<form id='cform' action="/campaigns/contacts/{{profile_id}}/feedbacks" method="POST">
+    <label for="type"/>Type: </label> <select id="type" name="type" >
+    %for x in feedback_type:
+    <option value="{{feedback_type.index(x)}}">{{x}}</option>
+    %end
+</select><br/><br/><label for="status"/>Status: </label> <select id="status" name="status" >
+    %for x in status_type:
+    <option value="{{status_type.index(x)}}">{{x}}</option>
+    %end
+</select><br/><br/>
+    <input type="text" id="action" name="action" required placeholder="Action to Take" /><br/>
+    <textarea name="desc" placeholder="Details about the Feedback" rows="6" cols="50" required/></textarea><br/>
+    <input type='submit' value="Create Feedback"/> <input type="reset" value="Clear"/>
+</form>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+<script> $("input:submit, a, button,input:reset").button();</script>
 </body>
 </html>
