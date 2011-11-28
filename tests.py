@@ -1,5 +1,7 @@
+import json
+import pickle
 import unittest
-from model import init_db, campaign, campaign_type, ctypes, drop_all
+from model import init_db, campaign, campaign_type, ctypes, drop_all, CHAT_EMAIL, makechatfromemail, profile
 
 __author__ = 'rohan'
 
@@ -28,6 +30,39 @@ class MyTestCase(unittest.TestCase):
 
     def test_profile(self):
         return True
+    def test_email_tree(self):
+        input = open("data.pkl","rb")
+        mail = pickle.load(input)
+        for y in mail:
+            print "=======######## GOt email "+(y['subject'] if 'subject' in y else "NO SUBJECT") +"  mid "+(y['id'] if 'id' in y else "NO ID") + "  parent id "+(y['parent'] if ('parent' in y and y['parent'] is not None) else "NO PARENT")
+            db = init_db()
+            contact = db.query(profile).filter(profile.pemail == "moeburney@gmail.com").first()
+            currchat = makechatfromemail(y)
+            if not contact.chats:
+                currchat.save(session=db)
+                contact.chats.append(currchat)
+                contact.save(session=db)
+                print "save single email"
+                continue
+            contact.chats.sort(key=lambda x:x.ts)
+            for old in contact.chats:
+                obj = json.loads(old.details)
+                if obj['id'] == y['id']:
+                    continue
+                if old.type == CHAT_EMAIL:
 
+                    print "OLD email "+(obj['subject'] if 'subject' in obj else "NO SUBJECT") +"  mid "+(obj['id'] if 'id' in obj else "NO ID" )+ "  parent id "+(obj['parent'] if ('parent' in obj and  obj['parent'] is not None) else "NO PARENT")
+                    if obj['id'] == (y['parent'] if 'parent' in y else ""):
+                        print "EMAIL " + y['id'] + " is reply to " + old['id']
+                        old.replies.append(currchat)
+                        old.save(session=db)
+                        currchat.save(session=db)
+                        contact.chats.append(currchat)
+                        contact.save(session=db)
+                        continue
+                    currchat.save(session=db)
+                    contact.chats.append(currchat)
+                    contact.save(session=db)
+        return True
 if __name__ == '__main__':
     unittest.main()

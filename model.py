@@ -415,10 +415,12 @@ def emails(conn, email, since="1-JAN-1970"):
             continue
         contact.chats.sort(key=lambda x:x.ts)
         for old in contact.chats:
-            if old['id'] == y['id']:
+            obj = json.loads(old.details)
+            if obj['id'] == y['id']:
+                print "$$ same email"
                 continue
             if old.type == CHAT_EMAIL:
-                obj = json.loads(old.details)
+
                 print "OLD email "+(obj['subject'] if 'subject' in obj else "NO SUBJECT") +"  mid "+(obj['id'] if 'id' in obj else "NO ID" )+ "  parent id "+(obj['parent'] if ('parent' in obj and  obj['parent'] is not None) else "NO PARENT")
                 if obj['id'] == (y['parent'] if 'parent' in y else ""):
                     print "EMAIL " + y['id'] + " is reply to " + old['id']
