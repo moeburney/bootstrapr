@@ -13,4 +13,11 @@ TWITTER_AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
 TWITTER_CALLBACK_URL = 'http://k4nu.com/campaigns/t/oauth'
 TWITTER_CONSUMER_KEY = "jL2l985ZHPYiRC5I4IOlzg"
 TWITTER_CONSUMER_SECRET = "hcVxPzghKsZNyHDy8YSzTyiFhIJ7S30Ajw7KX4Bas"
-  
+
+
+def setTwitterCallback(callback):
+    global TWITTER_CALLBACK_URL
+    TWITTER_CALLBACK_URL = callback
+def setGoogleCallback(callback):
+    global GOOGLE_CALLBACK_URL
+    GOOGLE_CALLBACK_URL=callback

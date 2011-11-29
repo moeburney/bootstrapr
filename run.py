@@ -20,8 +20,8 @@ if("dev" in args.env):
     print "### Running app in development environment"
     bottle.run(host='localhost', port=int(args.port), app=app)
 if("prod" in args.env):
-    Properties.GOOGLE_CALLBACK_URL = 'http://204.62.15.211/campaigns/g/oauth'
-    Properties.TWITTER_CALLBACK_URL = 'http://204.62.15.211/campaigns/t/oauth'
+    Properties.setTwitterCallback("http://204.62.15.211/campaigns/g/oauth")
+    Properties.setGoogleCallback("http://204.62.15.211/campaigns/t/oauth")
     init_db()
     threading.Thread(target=initwork).start()
     print "### Running app in production environment"
