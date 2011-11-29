@@ -17,6 +17,8 @@ import time
 import twitter as Twitter
 import oauth2 as oauth
 
+
+
 ##OAUTH STUFF
 GOOGLE_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
 GOOGLE_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
@@ -29,9 +31,6 @@ GOOGLE_RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
 GOOGLE_consumer = oauth.Consumer(GOOGLE_CONSUMER_KEY,GOOGLE_CONSUMER_SECRET)
 GOOGLE_client = oauth.Client(GOOGLE_consumer)
 GOOGLE_xoauth_displayname = "kkr"
-
-
-
 
 ##TWITTER OAUTH
 TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
