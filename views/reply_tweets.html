@@ -8,19 +8,13 @@
 </head>
 <body>
 %include common_menu
-%from model import chat_type, CHAT_EMAIL
 %import datetime
 
-%for id,list in chats.items():
-
-%for chat in list:
-<h4>{{chat.profile.name}}'s message on {{datetime.datetime.fromtimestamp(chat.ts)}}</h4>
-<p>Type : {{"Email" if chat.type == CHAT_EMAIL else "Social Media"}}</p>
-<p>Name : {{chat.profile.name}}</p>
-<p>Subject : {{chat.subject}}</p>
-<p>Message : {{chat.content.split("> ")[0]}}</p>
+%for tweet in items:
+<h4>{{tweet.mentioner}}'s message to {{tweet.mentioned}} on {{datetime.datetime.fromtimestamp(tweet.ts)}}</h4>
+<p>Type : "Tweet"</p>
+<p>Message : {{tweet.text}}</p>
 <br/><br/>
-%end
 <hr>
 %end
 

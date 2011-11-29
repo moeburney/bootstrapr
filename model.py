@@ -3,6 +3,7 @@ import json
 import pickle
 import re
 import string
+import threading
 import uuid
 from sqlalchemy.engine import create_engine, reflection
 from sqlalchemy.ext.declarative import declarative_base
@@ -10,9 +11,38 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.schema import Column, Table, ForeignKey, DropTable, DropConstraint, ForeignKeyConstraint, MetaData
-from sqlalchemy.sql.expression import and_
+from sqlalchemy.sql.expression import and_, desc
 from sqlalchemy.types import Integer, String, BigInteger, Float, Text
 import time
+import twitter as Twitter
+import oauth2 as oauth
+
+##OAUTH STUFF
+GOOGLE_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
+GOOGLE_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
+GOOGLE_AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
+GOOGLE_CALLBACK_URL = 'http://k4nu.com/campaigns/g/oauth'
+GOOGLE_CONSUMER_KEY = "anonymous"
+GOOGLE_CONSUMER_SECRET = "anonymous"
+GOOGLE_SCOPE = "https://mail.google.com/"
+GOOGLE_RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
+GOOGLE_consumer = oauth.Consumer(GOOGLE_CONSUMER_KEY,GOOGLE_CONSUMER_SECRET)
+GOOGLE_client = oauth.Client(GOOGLE_consumer)
+GOOGLE_xoauth_displayname = "kkr"
+
+
+
+
+##TWITTER OAUTH
+TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
+TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
+TWITTER_AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
+TWITTER_CALLBACK_URL = 'http://k4nu.com/campaigns/t/oauth'
+TWITTER_CONSUMER_KEY = "jL2l985ZHPYiRC5I4IOlzg"
+TWITTER_CONSUMER_SECRET = "hcVxPzghKsZNyHDy8YSzTyiFhIJ7S30Ajw7KX4Bas"
+TWITTER_consumer = oauth.Consumer(TWITTER_CONSUMER_KEY,TWITTER_CONSUMER_SECRET)
+TWITTER_client = oauth.Client(TWITTER_consumer)
+
 
 engine = create_engine("mysql://rohan:gotohome@localhost/ron")
 Base = declarative_base()
@@ -48,6 +78,7 @@ CHAT_CALL = 0
 CHAT_PHYSICAL = 1
 CHAT_EMAIL = 2
 CHAT_SOCIALMEDIA = 3
+CHAT_TWITTER =4
 
 
 
@@ -76,7 +107,7 @@ class campaign(Base):
     startTs = Column(BigInteger, default=0)
     endTs = Column(BigInteger, default=0)
     campaign_type = Column(Integer)
-    goal = Column(Integer)
+    goal = Column(Integer,default=0)
     roi = Column(Integer, default=0)
     rank = Column(Integer, default=0)
     expenses = Column(String(1000), default="{}")
@@ -91,7 +122,7 @@ class campaign(Base):
         outtemp = json.loads(self.expenses)
         res = 0
         for k, v in outtemp.iteritems():
-            if('unitexpense' in v):
+            if 'unitexpense' in v:
                 res += int(v['unitexpense']) * int(v['quantity'])
             else:
                 res += int(v['quantity'])
@@ -102,7 +133,7 @@ class campaign(Base):
         intemp = json.loads(self.gains)
         res = 0
         for k, v in intemp.iteritems():
-            if('unitgain' in v):
+            if 'unitgain' in v:
                 res += int(v['unitgain']) * int(v['quantity'])
             else:
                 res += int(v['quantity'])
@@ -126,7 +157,7 @@ class campaign(Base):
     @hybrid_property
     def campaign_desc(self):
         obj = campaign_type_get_one(self.campaign_type)
-        if(obj is not None):
+        if obj is not None:
             return obj.desc
         return None
 
@@ -135,7 +166,7 @@ class campaign(Base):
         self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
         self.desc = params.get('desc') if 'desc' in params else self.desc
         self.gains = params.get('gains') if 'gains' in params else self.gains
-        self.expenses = params.get('expenses') if 'expenses' in params else self.expense
+        self.expenses = params.get('expenses') if 'expenses' in params else self.expenses
         self.startTs = params.get('sts') if "sts" in params else self.startTs
         self.endTs = params.get('ets') if "ets" in params else self.endTs
         self.campaign_type = params.get('ctype') if "ctype" in params else self.campaign_type
@@ -197,14 +228,6 @@ class chat(Base):
         db.add(self)
         db.commit()
 
-"""mail['id'] = msg['Message-ID'].strip().strip("<").strip(">")
-mail['to'] = msg['to'].split('<')[1].strip('>')
-mail['from'] = msg['from'].split('<')[1].strip('>')
-mail['date'] = msg['date']
-mail['body'] = body
-mail['subject'] = msg['subject']
-mail['parent'] = msg['In-Reply-To'].strip().strip("<").strip(">") if "In-Reply-To" in msg else None"""
-
 def makechatfromemail(email):
     temp = chat()
     temp.details = json.dumps(email)
@@ -252,6 +275,19 @@ class feedback(Base):
         db = session
         db.add(self)
         db.commit()
+class tweet(Base):
+    __tablename__ = "tweets"
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    tid = Column(BigInteger,unique=True)
+    mentioned = Column(String(21))
+    mentioner = Column(String(21))
+    ts = Column(Integer)
+    text = Column(String(150))
+    details = Column(Text)
+    def save (self,session):
+        db = session
+        db.add(self)
+        db.commit()
 class profile(Base):
     __tablename__ = "profiles"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -269,6 +305,7 @@ class profile(Base):
     t_oauth_token = Column(String(55))
     t_oauth_token_secret = Column(String(55))
     twitter= Column(String(21))
+    problem = Column(Text,default="")
     @hybrid_property
     def latest(self):
         if self.chats:
@@ -368,6 +405,7 @@ def init_db(transactional=False):
         obj.profile_type = PROFILE_OWNER
         session.add(obj)
     session.commit()
+    
     return session
 
 
@@ -451,6 +489,88 @@ def get_first_text_part(msg):
                         return x.get_payload()
     elif maintype == 'text/plain':
         return msg.get_payload()
+
+#TWITTER ASYNC PULL
+def initwork():
+    currently_waiting = []
+
+    while True:
+        db = init_db()
+        twitter_prof = db.query(profile).filter(and_(profile.t_oauth_token != None,profile.t_oauth_token_secret != None))
+        if twitter_prof is not None:
+            for prof in twitter_prof:
+                if prof.twitter not in currently_waiting and prof.t_oauth_token is not None:
+                    currently_waiting.append(prof.twitter)
+                    threading.Thread(target=work,args=(prof.twitter,),name=prof.twitter).start()
+        db.close()
+
+
+def work(twitter):
+    print "working for "+str(twitter)
+
+    while True:
+        db = init_db()
+        prof = db.query(profile).filter(profile.twitter==twitter).first()
+        if prof:
+            if  prof.t_oauth_token and prof.t_oauth_token_secret:
+                api = Twitter.Api(consumer_key=TWITTER_CONSUMER_KEY,consumer_secret=TWITTER_CONSUMER_SECRET,access_token_key=prof.t_oauth_token,access_token_secret=prof.t_oauth_token_secret)
+                user = api.VerifyCredentials()
+                if user:
+                    print user.screen_name+" twitter sleeping for "+str(api.MaximumHitFrequency())
+                    time.sleep(api.MaximumHitFrequency())
+                    print "INIT twitter --> "+str(user.screen_name)
+                    last_id = db.query(tweet.tid).filter(tweet.mentioned==prof.twitter).order_by(desc(tweet.ts)).first()
+                    if last_id and last_id != 0:
+
+                        mentions = get_mentions(since=unicode(last_id[0]),api=api)
+                    else:
+                        mentions = get_mentions(api=api)
+                    save_mentions(mentions,db=db,curr_handle=prof.twitter)
+                else:
+                    if prof.problem == "":
+                        prof.problem = "Twitter Oauth is invalid, Please Authorize Again"
+                        db.add(prof)
+                        db.commit()
+        db.close()
+
+def get_mentions(api,since=None):
+    mentions = []
+    if since is not None:
+        i = 0
+        while True:
+            print "getting tweets since "+since
+            temp = api.GetMentions(since_id=since,page=i)
+            if temp:
+                mentions.extend(temp)
+                i+=1
+            if not temp:
+                break
+    else:
+        i =0
+        while True:
+            temp = api.GetMentions(page=i)
+            if temp:
+                mentions.extend(temp)
+                i +=1
+            if not temp:
+                break
+    return mentions
+def save_mentions(mentions,db,curr_handle):
+    if mentions:
+        for mention in mentions:
+            tweet_in_db = db.query(tweet).filter(tweet.tid==mention.id).first()
+            if not tweet_in_db:
+                obj = tweet()
+                obj.tid = mention.id
+                obj.mentioned = curr_handle
+                obj.mentioner = mention.user.screen_name
+                obj.ts = mention.created_at_in_seconds
+                obj.text = mention.text
+                obj.details = mention.AsJsonString()
+                db.add(obj)
+                db.commit()
+                print "saved tweet id "+str(obj.tid)+"  <===> for "+curr_handle
+    return
 
 if __name__ == "__main__":
     init_db()

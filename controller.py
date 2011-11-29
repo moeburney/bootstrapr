@@ -1,5 +1,5 @@
 from _collections import defaultdict
-import string
+import os
 import datetime
 import oauth2.clients.imap as imaplib
 import json
@@ -7,46 +7,21 @@ import urllib
 import urlparse
 from beaker.middleware import SessionMiddleware
 import bottle
-from sqlalchemy.sql.expression import and_, desc, asc
-import time
-from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback
+from sqlalchemy.sql.expression import and_, desc
+from bottle import route, request, get, post, view
+
+from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback, tweet, TWITTER_REQUEST_TOKEN_URL, TWITTER_CALLBACK_URL, TWITTER_consumer, TWITTER_AUTHORIZATION_URL, TWITTER_ACCESS_TOKEN_URL, TWITTER_client, GOOGLE_REQUEST_TOKEN_URL, GOOGLE_SCOPE, GOOGLE_CALLBACK_URL, GOOGLE_xoauth_displayname, GOOGLE_consumer, GOOGLE_AUTHORIZATION_URL, GOOGLE_ACCESS_TOKEN_URL, GOOGLE_client, GOOGLE_RESOURCE_URL
 import oauth2 as oauth
 __author__ = 'rohan'
+os.chdir(os.path.dirname(__file__))
 
 url_root = "/campaigns"
 ENV = ['Production', 'Development']
 
 __author__ = 'rohan'
-from bottle import route, request, get, post, view
 
-bottle.debug(True)
+bottle.debug()
 
-
-##OAUTH STUFF
-GOOGLE_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
-GOOGLE_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
-GOOGLE_AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
-GOOGLE_CALLBACK_URL = 'http://k4nu.com/campaigns/g/oauth'
-GOOGLE_CONSUMER_KEY = "anonymous"
-GOOGLE_CONSUMER_SECRET = "anonymous"
-GOOGLE_SCOPE = "https://mail.google.com/"
-GOOGLE_RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
-GOOGLE_consumer = oauth.Consumer(GOOGLE_CONSUMER_KEY,GOOGLE_CONSUMER_SECRET)
-GOOGLE_client = oauth.Client(GOOGLE_consumer)
-GOOGLE_xoauth_displayname = "kkr"
-
-
-
-
-##TWITTER OAUTH
-TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
-TWITTER_AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
-TWITTER_CALLBACK_URL = 'http://k4nu.com/campaigns/t/oauth'
-TWITTER_CONSUMER_KEY = "jL2l985ZHPYiRC5I4IOlzg"
-TWITTER_CONSUMER_SECRET = "hcVxPzghKsZNyHDy8YSzTyiFhIJ7S30Ajw7KX4Bas"
-TWITTER_consumer = oauth.Consumer(TWITTER_CONSUMER_KEY,TWITTER_CONSUMER_SECRET)
-TWITTER_client = oauth.Client(TWITTER_consumer)
 
 
 
@@ -71,7 +46,7 @@ def get_session():
 def validate_login():
     session = get_session()
     if 'uid' in session and 'loggedin' in session:
-        if session['loggedin'] == True:
+        if session['loggedin']:
             return True
     else:
         return False
@@ -107,7 +82,7 @@ def login(user, passwd):
 @get(url_root+'/t/start_oauth')
 def handler():
     global TWITTER_client
-    url = TWITTER_REQUEST_TOKEN_URL+'?oauth_callback=%s' % (TWITTER_CALLBACK_URL)
+    url = TWITTER_REQUEST_TOKEN_URL+'?oauth_callback=%s' % TWITTER_CALLBACK_URL
     resp, content = TWITTER_client.request(url, 'GET')
     try:
         oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
@@ -131,7 +106,7 @@ def handler():
 @route(url_root+'/t/oauth',Methods=['GET','POST'])
 def handler():
     url = TWITTER_ACCESS_TOKEN_URL+'?oauth_token=%s&oauth_verifier=%s' % (request.GET.get('oauth_token'),request.GET.get('oauth_verifier'))
-    resp, content = TWITTER_client.request(url, 'GET')
+    resp, content = TWITTER_client.request(url)
     if resp['status'] == '200':
         print 'OAuthGetAccessToken OK'
         db = init_db()
@@ -174,7 +149,7 @@ def handler():
 @route(url_root+'/g/oauth',Methods=['GET','POST'])
 def handler():
     url = GOOGLE_ACCESS_TOKEN_URL+'?oauth_token=%s&oauth_verifier=%s' % (request.GET.get('oauth_token'),request.GET.get('oauth_verifier'))
-    resp, content = GOOGLE_client.request(url, 'GET')
+    resp, content = GOOGLE_client.request(url)
     if resp['status'] == '200':
         print 'OAuthGetAccessToken OK'
         db = init_db()
@@ -211,11 +186,12 @@ def handler():
 def handler():
     db = init_db()
     sess = get_session()
+    prof = db.query(profile).filter(profile.id==sess['uid']).first()
     objs = db.query(campaign).filter(campaign.profiles.any(id=sess['uid'])).all()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
     isoauth = True if (curr_prof.g_oauth_token is not None and curr_prof.g_oauth_token_secret is not None) else False
     istoauth = True if (curr_prof.t_oauth_token is not None and curr_prof.t_oauth_token_secret is not None) else False
-    return dict(items=objs,isoauth=isoauth,istoauth=istoauth)
+    return dict(items=objs,isoauth=isoauth,istoauth=istoauth,profile=prof)
 
 
 @get(url_root + '/:id')
@@ -240,7 +216,7 @@ def handler(id):
     sess = get_session()
     db = init_db()
     obj = db.query(campaign).filter(and_(campaign.profiles.any(id=sess['uid']),campaign.id==id)).first()
-    if(obj is None):
+    if obj is None:
         bottle.redirect(url_root)
     obj.delete(session=db)
     bottle.redirect(url_root)
@@ -267,7 +243,7 @@ def handler():
         current_profile.campaign.append(obj)
         current_profile.save(session=db)
     
-    if(obj is None):
+    if obj is None:
         return "error"
     bottle.redirect(url_root + '/' + str(obj.id))
 
@@ -278,7 +254,7 @@ def handler(id):
     db = init_db()
     sess = get_session()
     obj = db.query(campaign).filter(and_(campaign.profiles.any(id=sess['uid']),campaign.id==id,campaign.uuid == request.POST.get('uuid'))).first()
-    if(obj is None):
+    if obj is None:
         bottle.redirect(url_root)
     obj.update(request.POST,session=db)
 
@@ -348,7 +324,7 @@ def handler(cid):
 def handler(cid):
     db = init_db()
     obj = db.query(profile).filter(and_(profile.id == cid, profile.uuid == request.POST.get('uuid'))).first()
-    if(obj is None):
+    if obj is None:
         bottle.redirect(url_root_contacts)
     obj.update(request.POST,session=db)
     bottle.redirect(url_root_contacts + '/' + cid)
@@ -379,8 +355,18 @@ def handler(cid):
     conn.select("INBOX",readonly=True)
     print "geting email for "+contact.pemail
     emails(conn,contact.pemail,since=since)
-    bottle.redirect(url_root_contacts+'/%s/emails'%(cid))
+    bottle.redirect(url_root_contacts+'/%s/emails'% cid)
 
+@get(url_root_contacts+'/:cid/tweets')
+@auth()
+@view("reply_tweets")
+def handler(cid):
+    db = init_db()
+    curr_profile_twitter = db.query(profile.twitter).filter(profile.id==get_session()['uid']).first()[0]
+    contact_profile_twitter = db.query(profile.twitter).filter(profile.id==cid).first()[0]
+    print "Mentioned "+str(curr_profile_twitter)+" mentioner "+str(contact_profile_twitter)
+    tweets = db.query(tweet).filter(and_(tweet.mentioned==curr_profile_twitter,tweet.mentioner==contact_profile_twitter)).order_by(desc(tweet.ts))
+    return dict(items=tweets)
 @get(url_root_contacts + '/:cid/feedbacks')
 @auth()
 @view('all_feedbacks')
@@ -509,7 +495,7 @@ def handler(cid,id):
     reply.save(session=db)
     current_profile.chats.append(reply)
     current_profile.save(session=db)
-    print reply.topic.content
+    print reply.replies.topic.content
     bottle.redirect(url_root_contacts+'/%s/chats/%s/reply' % (cid,id))
 
 
