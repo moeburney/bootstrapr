@@ -2,7 +2,7 @@ import argparse
 import threading
 import bottle
 from controller import app
-from model import init_db, initwork, ENVV_DEV,ENVV, ENVV_PROD
+from model import init_db, initwork
 
 __author__ = 'rohan'
 parser = argparse.ArgumentParser(description="Run Script for Marketing blasts")
