@@ -20,25 +20,13 @@ import oauth2 as oauth
 
 
 ##OAUTH STUFF
-GOOGLE_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken'
-GOOGLE_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
-GOOGLE_AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
-GOOGLE_CALLBACK_URL = 'http://k4nu.com/campaigns/g/oauth'
-GOOGLE_CONSUMER_KEY = "anonymous"
-GOOGLE_CONSUMER_SECRET = "anonymous"
-GOOGLE_SCOPE = "https://mail.google.com/"
-GOOGLE_RESOURCE_URL = "https://mail.google.com/mail/b/%s/imap/"
+from Properties import GOOGLE_CONSUMER_KEY, GOOGLE_CONSUMER_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+
 GOOGLE_consumer = oauth.Consumer(GOOGLE_CONSUMER_KEY,GOOGLE_CONSUMER_SECRET)
 GOOGLE_client = oauth.Client(GOOGLE_consumer)
 GOOGLE_xoauth_displayname = "kkr"
 
 ##TWITTER OAUTH
-TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
-TWITTER_AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
-TWITTER_CALLBACK_URL = 'http://k4nu.com/campaigns/t/oauth'
-TWITTER_CONSUMER_KEY = "jL2l985ZHPYiRC5I4IOlzg"
-TWITTER_CONSUMER_SECRET = "hcVxPzghKsZNyHDy8YSzTyiFhIJ7S30Ajw7KX4Bas"
 TWITTER_consumer = oauth.Consumer(TWITTER_CONSUMER_KEY,TWITTER_CONSUMER_SECRET)
 TWITTER_client = oauth.Client(TWITTER_consumer)
 
@@ -513,7 +501,14 @@ def work(twitter):
         if prof:
             if  prof.t_oauth_token and prof.t_oauth_token_secret:
                 api = Twitter.Api(consumer_key=TWITTER_CONSUMER_KEY,consumer_secret=TWITTER_CONSUMER_SECRET,access_token_key=prof.t_oauth_token,access_token_secret=prof.t_oauth_token_secret)
-                user = api.VerifyCredentials()
+                try:
+                    user = api.VerifyCredentials()
+                except Twitter.TwitterError:
+                    if prof.problem == "":
+                        prof.problem = "Twitter Oauth is invalid, Please Authorize Again"
+                        db.add(prof)
+                        db.commit()
+                    continue
                 if user:
                     print user.screen_name+" twitter sleeping for "+str(api.MaximumHitFrequency())
                     time.sleep(api.MaximumHitFrequency())

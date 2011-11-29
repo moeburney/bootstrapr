@@ -9,8 +9,9 @@ from beaker.middleware import SessionMiddleware
 import bottle
 from sqlalchemy.sql.expression import and_, desc
 from bottle import route, request, get, post, view
+from Properties import TWITTER_REQUEST_TOKEN_URL, TWITTER_CALLBACK_URL, TWITTER_AUTHORIZATION_URL, TWITTER_ACCESS_TOKEN_URL, GOOGLE_REQUEST_TOKEN_URL, GOOGLE_SCOPE, GOOGLE_CALLBACK_URL, GOOGLE_AUTHORIZATION_URL, GOOGLE_ACCESS_TOKEN_URL, GOOGLE_RESOURCE_URL
 
-from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback, tweet, TWITTER_REQUEST_TOKEN_URL, TWITTER_CALLBACK_URL, TWITTER_consumer, TWITTER_AUTHORIZATION_URL, TWITTER_ACCESS_TOKEN_URL, TWITTER_client, GOOGLE_REQUEST_TOKEN_URL, GOOGLE_SCOPE, GOOGLE_CALLBACK_URL, GOOGLE_xoauth_displayname, GOOGLE_consumer, GOOGLE_AUTHORIZATION_URL, GOOGLE_ACCESS_TOKEN_URL, GOOGLE_client, GOOGLE_RESOURCE_URL
+from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback, tweet,  TWITTER_consumer,   TWITTER_client,    GOOGLE_xoauth_displayname, GOOGLE_consumer,   GOOGLE_client
 import oauth2 as oauth
 __author__ = 'rohan'
 os.chdir(os.path.dirname(__file__))
@@ -191,6 +192,7 @@ def handler():
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
     isoauth = True if (curr_prof.g_oauth_token is not None and curr_prof.g_oauth_token_secret is not None) else False
     istoauth = True if (curr_prof.t_oauth_token is not None and curr_prof.t_oauth_token_secret is not None) else False
+    istoauth = False if curr_prof.problem != "" else isoauth
     return dict(items=objs,isoauth=isoauth,istoauth=istoauth,profile=prof)
 
 
