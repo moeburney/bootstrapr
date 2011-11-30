@@ -68,17 +68,19 @@ def auth(check_func=validate_login):
 
 
 def logout():
-    get_session().delete()
+    sess = get_session()
+    sess.delete()
 
 
 def login(user, passwd):
     db = init_db()
     user = db.query(profile).filter(and_(profile.name==user,profile.passwd==passwd)).first()
     if user:
-        get_session()['uid'] = user.id
-        get_session()['loggedin'] = True
+        sess = get_session()
+        sess['uid'] = user.id
+        sess['loggedin'] = True
     else:
-        get_session().delete()
+        return
 
 @get(url_root+'/t/start_oauth')
 def handler():
@@ -111,7 +113,11 @@ def handler():
     if resp['status'] == '200':
         print 'OAuthGetAccessToken OK'
         db = init_db()
-        curr_uid = get_session()['uid']
+        try:
+            sess = get_session()
+            curr_uid = sess['uid']
+        except :
+            bottle.redirect(url_root)
         curr_profile = db.query(profile).filter(profile.id==curr_uid).first()
         if curr_profile:
             curr_profile.t_oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
@@ -154,7 +160,11 @@ def handler():
     if resp['status'] == '200':
         print 'OAuthGetAccessToken OK'
         db = init_db()
-        curr_uid = get_session()['uid']
+        try:
+            sess = get_session()
+            curr_uid = sess['uid']
+        except :
+            bottle.redirect(url_root)
         curr_profile = db.query(profile).filter(profile.id==curr_uid).first()
         if curr_profile:
             curr_profile.g_oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
@@ -335,7 +345,8 @@ def handler(cid):
 @auth()
 def handler(cid):
     db = init_db()
-    g_oauth_token,g_oauth_token_secret,email = db.query(profile.g_oauth_token,profile.g_oauth_token_secret,profile.pemail).filter(profile.id==get_session()['uid']).first()
+    sess = get_session()
+    g_oauth_token,g_oauth_token_secret,email = db.query(profile.g_oauth_token,profile.g_oauth_token_secret,profile.pemail).filter(profile.id==sess['uid']).first()
     if g_oauth_token is None:
         bottle.redirect(url_root+'/g/start_oauth')
     contact = db.query(profile).filter(profile.id==cid).first()
@@ -364,7 +375,8 @@ def handler(cid):
 @view("reply_tweets")
 def handler(cid):
     db = init_db()
-    curr_profile_twitter = db.query(profile.twitter).filter(profile.id==get_session()['uid']).first()[0]
+    sess = get_session()
+    curr_profile_twitter = db.query(profile.twitter).filter(profile.id==sess['uid']).first()[0]
     contact_profile_twitter = db.query(profile.twitter).filter(profile.id==cid).first()[0]
     print "Mentioned "+str(curr_profile_twitter)+" mentioner "+str(contact_profile_twitter)
     tweets = db.query(tweet).filter(and_(tweet.mentioned==curr_profile_twitter,tweet.mentioner==contact_profile_twitter)).order_by(desc(tweet.ts))
