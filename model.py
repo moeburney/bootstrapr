@@ -467,10 +467,14 @@ def get_first_text_part(msg):
     maintype = msg.get_content_type()
     if maintype == "multipart/mixed" or maintype == "multipart/alternative":
         for part in msg.get_payload():
+            if type(part) == str:
+                return part
             if part.get_content_type() == "text/plain":
                 return part.get_payload()
             else:
                 for x in part.get_payload():
+                    if type(x) == str:
+                        return x
                     if x.get_content_type() == "text/plain":
                         return x.get_payload()
     elif maintype == 'text/plain':

@@ -1,6 +1,7 @@
 from _collections import defaultdict
 import os
 import datetime
+import threading
 import oauth2.clients.imap as imaplib
 import json
 import urllib
@@ -203,7 +204,7 @@ def handler():
     isoauth = True if (curr_prof.g_oauth_token is not None and curr_prof.g_oauth_token_secret is not None) else False
     istoauth = True if (curr_prof.t_oauth_token is not None and curr_prof.t_oauth_token_secret is not None) else False
     istoauth = False if curr_prof.problem != "" else istoauth
-    return dict(items=objs,isoauth=isoauth,istoauth=istoauth,profile=prof)
+    return dict(items=objs,isoauth=isoauth,istoauth=istoauth,profile=prof,sess=sess)
 
 
 @get(url_root + '/:id')
@@ -367,8 +368,10 @@ def handler(cid):
         bottle.redirect(url_root+'/g/start_oauth')
     conn.select("INBOX",readonly=True)
     print "geting email for "+contact.pemail
-    emails(conn,contact.pemail,since=since)
-    bottle.redirect(url_root_contacts+'/%s'% cid)
+    threading.Thread(target=emails,args=(conn,contact.pemail,since)).start()
+    sess = get_session()
+    sess['msg'] = "Emails for %s will be fetched in a few milliseconds" % contact.pemail
+    bottle.redirect(url_root)
 
 @get(url_root_contacts+'/:cid/tweets')
 @auth()
