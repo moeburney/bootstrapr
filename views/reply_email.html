@@ -10,16 +10,29 @@
 %include common_menu
 %from model import chat_type, CHAT_EMAIL
 %import datetime
+%keys = chats.keys()
+%keys.sort(reverse=True)
+%for cid in keys:
 
-%for id,list in chats.items():
-
-%for chat in list:
-<h4>{{chat.profile.name}}'s message on {{datetime.datetime.fromtimestamp(chat.ts)}}</h4>
+%i= 0
+%for chat in chats[cid]:
+%if i >0:
+<div style="margin-left:{{i*2}}%;"><h4>{{chat.profile.name}}'s message on {{datetime.datetime.fromtimestamp(chat.ts)}}</h4>
 <p>Type : {{"Email" if chat.type == CHAT_EMAIL else "Social Media"}}</p>
 <p>Name : {{chat.profile.name}}</p>
 <p>Subject : {{chat.subject}}</p>
 <p>Message : {{chat.content.split("> ")[0]}}</p>
-<br/><br/>
+<br/></div>
+%else:
+<div><h4>{{chat.profile.name}}'s message on {{datetime.datetime.fromtimestamp(chat.ts)}}</h4>
+<p>Type : {{"Email" if chat.type == CHAT_EMAIL else "Social Media"}}</p>
+<p>Name : {{chat.profile.name}}</p>
+<p>Subject : {{chat.subject}}</p>
+<p>Message : {{chat.content.split("> ")[0]}}</p>
+<br/></div>
+%end
+%i+=1
+
 %end
 <hr>
 %end

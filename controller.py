@@ -192,7 +192,7 @@ def handler():
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
     isoauth = True if (curr_prof.g_oauth_token is not None and curr_prof.g_oauth_token_secret is not None) else False
     istoauth = True if (curr_prof.t_oauth_token is not None and curr_prof.t_oauth_token_secret is not None) else False
-    istoauth = False if curr_prof.problem != "" else isoauth
+    istoauth = False if curr_prof.problem != "" else istoauth
     return dict(items=objs,isoauth=isoauth,istoauth=istoauth,profile=prof)
 
 
@@ -357,7 +357,7 @@ def handler(cid):
     conn.select("INBOX",readonly=True)
     print "geting email for "+contact.pemail
     emails(conn,contact.pemail,since=since)
-    bottle.redirect(url_root_contacts+'/%s/emails'% cid)
+    bottle.redirect(url_root_contacts+'/%s'% cid)
 
 @get(url_root_contacts+'/:cid/tweets')
 @auth()
@@ -481,6 +481,7 @@ def handler(cid):
         js = json.loads(x.details)
         if 'gtid' in js:
             gtid[js['gtid']].append(x)
+
     return dict(chats=gtid)
 
 @post(url_root_contacts+'/:cid/chats/:id/reply')

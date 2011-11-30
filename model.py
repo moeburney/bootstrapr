@@ -425,8 +425,7 @@ def emails(conn, email, since="1970/01/01"):
             mail.append(currmail)
 
     mail.reverse()
-    output = open('/home/rohan/data.pkl', 'wb')
-    pickle.dump(mail, output)
+    
     for y in mail:
         db = init_db()
         contact = db.query(profile).filter(profile.pemail == email).first()
