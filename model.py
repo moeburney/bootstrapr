@@ -1,4 +1,5 @@
 import email
+from email.utils import parsedate_tz, mktime_tz
 import json
 import pickle
 import re
@@ -219,8 +220,9 @@ def makechatfromemail(email):
     temp = chat()
     temp.details = json.dumps(email)
     if email['date'] is not None:
-        stemp = email['date'].split(" ")[-1]
-        temp.ts = time.mktime(time.strptime(email['date'], "%a, %d %b %Y %H:%M:%S " + stemp))
+        tempst = parsedate_tz(email['date'])
+        if tempst:
+            temp.ts = mktime_tz(tempst)
 
     temp.content = email['body']
     temp.subject = email['subject']
