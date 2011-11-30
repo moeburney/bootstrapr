@@ -509,8 +509,10 @@ def work(twitter):
                         db.commit()
                     continue
                 if user:
-                    print user.screen_name+" twitter sleeping for "+str(api.MaximumHitFrequency())
-                    time.sleep(api.MaximumHitFrequency())
+                    try:
+                        time.sleep(api.MaximumHitFrequency())
+                    except:
+                        continue
                     print "INIT twitter --> "+str(user.screen_name)
                     last_id = db.query(tweet.tid).filter(tweet.mentioned==prof.twitter).order_by(desc(tweet.ts)).first()
                     if last_id and last_id != 0:
@@ -532,7 +534,10 @@ def get_mentions(api,since=None):
         i = 0
         while True:
             print "getting tweets since "+since
-            temp = api.GetMentions(since_id=since,page=i)
+            try:
+                temp = api.GetMentions(since_id=since,page=i)
+            except:
+                continue
             if temp:
                 mentions.extend(temp)
                 i+=1
@@ -541,7 +546,10 @@ def get_mentions(api,since=None):
     else:
         i =0
         while True:
-            temp = api.GetMentions(page=i)
+            try:
+                temp = api.GetMentions(page=i)
+            except:
+                continue
             if temp:
                 mentions.extend(temp)
                 i +=1
