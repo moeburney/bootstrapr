@@ -558,7 +558,9 @@ def get_contact_timeline(id,type):
         tweets = db.query(tweet).filter(tweet.mentioner==contact.twitter)
         for obj in tweets:
            temp1[int(obj.ts*1000)] +=1
+
     temp['data'] = temp1.items()
+    temp['data'].sort()
     print temp
     return temp
 
@@ -577,7 +579,9 @@ def get_campaign_timeline(id,uid):
         tweets = db.query(tweet).filter(tweet.mentioner==prof.twitter)
         for obj in tweets:
             temp1[int(obj.ts*1000)] +=1
+
         temp['data'] = temp1.items()
+    temp['data'].sort()
     print temp
     return temp
 
