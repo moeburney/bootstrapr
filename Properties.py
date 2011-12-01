@@ -3,6 +3,8 @@ GOOGLE_REQUEST_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetRequestToken
 GOOGLE_ACCESS_TOKEN_URL = 'https://www.google.com/accounts/OAuthGetAccessToken'
 GOOGLE_AUTHORIZATION_URL = 'https://www.google.com/accounts/OAuthAuthorizeToken'
 GOOGLE_CALLBACK_URL = 'http://www.bootstrapr.net/campaigns/g/oauth'
+#GOOGLE_CALLBACK_URL = 'http://moe.k4nu.com/campaigns/g/oauth'
+
 GOOGLE_CONSUMER_KEY = "anonymous"
 GOOGLE_CONSUMER_SECRET = "anonymous"
 GOOGLE_SCOPE = "https://mail.google.com/"
@@ -11,6 +13,8 @@ TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
 TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
 TWITTER_AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
 TWITTER_CALLBACK_URL = 'http://www.bootstrapr.net/campaigns/t/oauth'
+#TWITTER_CALLBACK_URL = 'http://moe.k4nu.com/campaigns/t/oauth'
+
 TWITTER_CONSUMER_KEY = "jL2l985ZHPYiRC5I4IOlzg"
 TWITTER_CONSUMER_SECRET = "hcVxPzghKsZNyHDy8YSzTyiFhIJ7S30Ajw7KX4Bas"
 

@@ -1,3 +1,4 @@
+from _collections import defaultdict
 import email
 from email.utils import parsedate_tz, mktime_tz
 import json
@@ -264,6 +265,7 @@ class feedback(Base):
         db = session
         db.add(self)
         db.commit()
+
 class tweet(Base):
     __tablename__ = "tweets"
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
@@ -533,7 +535,88 @@ def work(twitter):
                         db.add(prof)
                         db.commit()
         db.close()
+def get_contact_timeline(id,type):
+    db = init_db()
+    contact = db.query(profile).filter(profile.id==id).first()
+    if contact is None:
+        return False
+    temp = defaultdict(dict)
+    temp['label'] = type
+    temp1 = defaultdict(int)
+    if type in ["email","chat"]:
+        for chats in contact.chats:
+            if type == "email":
+                if chats.type == CHAT_EMAIL:
+                    temp1[int(chats.ts*1000)] +=1
+            if type == "chat":
+                if chats.type not in [CHAT_EMAIL,CHAT_SOCIALMEDIA,CHAT_TWITTER]:
+                    temp1[int(chats.ts*1000)] +=1
+    if type == "feedback":
+        for feedbacs in contact.feedbacks:
+            temp1[int(feedbacs.ts*1000)] +=1
+    if type=="twitter":
+        tweets = db.query(tweet).filter(tweet.mentioner==contact.twitter)
+        for obj in tweets:
+           temp1[int(obj.ts*1000)] +=1
+    temp['data'] = temp1.items()
+    print temp
+    return temp
 
+def get_campaign_timeline(id,uid):
+    db = init_db()
+    campaigns = db.query(campaign).filter(and_(campaign.profiles.any(id=uid),campaign.id==id)).first()
+    temp = defaultdict(dict)
+    temp['label'] = campaigns.desc
+    temp1 = defaultdict(int)
+    for prof in campaigns.profiles:
+
+        for chats in prof.chats:
+            temp1[int(chats.ts*1000)] +=1
+        for feedbacs in prof.feedbacks:
+            temp1[int(feedbacs.ts*1000)] +=1
+        tweets = db.query(tweet).filter(tweet.mentioner==prof.twitter)
+        for obj in tweets:
+            temp1[int(obj.ts*1000)] +=1
+        temp['data'] = temp1.items()
+    print temp
+    return temp
+
+def get_campaign_data_point(id,uid,ts):
+    db = init_db()
+    campaigns = db.query(campaign).filter(and_(campaign.profiles.any(id=uid),campaign.id==id)).first()
+    data = defaultdict(dict)
+    for prof in campaigns.profiles:
+        temp = defaultdict(list)
+        for chats in prof.chats:
+            temp1 = {}
+            if chats.ts ==ts:
+                temp1['id'] = chats.id
+                temp1['content'] = chats.content
+                if chats.type == CHAT_EMAIL:
+                    temp1['content'] = temp1['content'].split('<')[0]
+                    temp['emails'].append(temp1)
+                if chats.type != CHAT_EMAIL:
+                    temp['chats'].append(temp1)
+
+        for feedbacs in prof.feedbacks:
+            if feedbacs.ts == ts:
+                temp1= {}
+                temp1['id'] = chats.id
+                temp1['content'] = chats.content
+                temp['feedbacks'].append(temp1)
+        tweets = db.query(tweet).filter(and_(tweet.mentioner==prof.twitter,tweet.ts==ts))
+        for obj in tweets:
+            temp1 = {}
+            temp1['content'] = obj.text
+            temp['tweets'].append(temp1)
+        if prof.id == uid:
+            data['you'] = temp
+        else:
+            data[prof.name] = temp
+    print data
+    print json.dumps(data)
+    return data
+    
 def get_mentions(api,since=None):
     mentions = []
     if since is not None:

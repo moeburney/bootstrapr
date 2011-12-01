@@ -2,7 +2,12 @@
 <html>
 <head>
     <title>Edit Contact</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css">
+    <script language="javascript" type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
+
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="/campaigns/css/base.css"/>
 </head>
@@ -10,6 +15,96 @@
 %include common_menu
 %include common_contact_menu cid=obj.id
 %from model import PROFILE_OWNER
+<div id="placeholder" style="width:700px;height:300px;"></div>
+<p id="choices">Show:</p>
+<br/>
+
+<script type="text/javascript">
+    $(function () {
+
+var datasets = {
+
+}
+
+
+   $.ajax({
+    type: 'GET',
+    url: '/campaigns/contacts/{{obj.id}}/timeline/email',
+    dataType: 'json',
+    success: function(data) { datasets['email'] = data; },
+    data: {},
+    async: false
+});
+         $.ajax({
+    type: 'GET',
+    url: '/campaigns/contacts/{{obj.id}}/timeline/chat',
+    dataType: 'json',
+    success: function(data) { datasets['chat'] = data; },
+    data: {},
+    async: false
+});
+         $.ajax({
+    type: 'GET',
+    url: '/campaigns/contacts/{{obj.id}}/timeline/twitter',
+    dataType: 'json',
+    success: function(data) { datasets['twitter'] = data; },
+    data: {},
+    async: false
+});
+        $.ajax({
+    type: 'GET',
+    url: '/campaigns/contacts/{{obj.id}}/timeline/feedback',
+    dataType: 'json',
+    success: function(data) { datasets['feedback'] = data; },
+    data: {},
+    async: false
+});
+
+
+
+    var i = 0;
+    $.each(datasets, function(key, val) {
+        val.color = i;
+        ++i;
+    });
+
+    // insert checkboxes
+    var choiceContainer = $("#choices");
+    $.each(datasets, function(key, val) {
+        choiceContainer.append('<br/><input type="checkbox" name="' + key +
+                               '" checked="checked" id="id' + key + '">' +
+                               '<label for="id' + key + '">'
+                                + val.label + '</label>');
+    });
+    choiceContainer.find("input").click(plotAccordingToChoices);
+
+
+    function plotAccordingToChoices() {
+        var data = [];
+
+        choiceContainer.find("input:checked").each(function () {
+            var key = $(this).attr("name");
+            if (key && datasets[key])
+                data.push(datasets[key]);
+        });
+
+        if (data.length > 0)
+            $.plot($("#placeholder"), data, {
+                xaxis: { mode: "time",autoscaleMargin:0.02 },
+                grid: { hoverable: true, clickable: true },
+                legend: {
+                    position: "nw",
+                    backgroundOpacity: 0.5
+
+                  }
+            });
+    }
+
+    plotAccordingToChoices();
+});
+</script>
+
+
 <form action="/campaigns/contacts/{{obj.id}}" method="POST">
     <input type="hidden" id="uuid" name="uuid" value="{{obj.uuid}}"/>
     <input type="text" id="name" name="name" placeholder="Name" required value="{{obj.name}}"/><br/>
@@ -32,8 +127,6 @@
     %end
     <input type="submit" value="Update"/>
 </form>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 <script type="text/javascript"> $(function() {
     $("input:submit, a, button,input:reset").button();
 });

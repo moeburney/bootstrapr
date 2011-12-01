@@ -12,7 +12,7 @@ from sqlalchemy.sql.expression import and_, desc
 from bottle import route, request, get, post, view
 from Properties import TWITTER_REQUEST_TOKEN_URL, TWITTER_CALLBACK_URL, TWITTER_AUTHORIZATION_URL, TWITTER_ACCESS_TOKEN_URL, GOOGLE_REQUEST_TOKEN_URL, GOOGLE_SCOPE, GOOGLE_CALLBACK_URL, GOOGLE_AUTHORIZATION_URL, GOOGLE_ACCESS_TOKEN_URL, GOOGLE_RESOURCE_URL
 
-from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback, tweet,  TWITTER_consumer,   TWITTER_client,    GOOGLE_xoauth_displayname, GOOGLE_consumer,   GOOGLE_client
+from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback, tweet,  TWITTER_consumer,   TWITTER_client,    GOOGLE_xoauth_displayname, GOOGLE_consumer,   GOOGLE_client, get_campaign_timeline, get_campaign_data_point, get_contact_timeline
 import oauth2 as oauth
 __author__ = 'rohan'
 os.chdir(os.path.dirname(__file__))
@@ -222,7 +222,20 @@ def handler(id):
     return dict(item=obj, ctypes=types, uattrs=json.loads(obj.attrs), gains=gaintypes, expenses=expensetypes,
                 status=status, ugains=json.loads(obj.gains), uexpenses=json.loads(obj.expenses))
 
-
+@get(url_root+'/:id/timeline')
+@auth()
+def handler(id):
+    sess = get_session()
+    timeline = get_campaign_timeline(id,uid=sess['uid'])
+    print json.dumps(timeline)
+    return json.dumps(timeline)
+@get(url_root+'/:id/:ts/data')
+@auth()
+def handler(id,ts):
+    sess = get_session()
+    data = get_campaign_data_point(id,sess['uid'],ts)
+    print json.dumps(data)
+    return json.dumps(data)
 @get(url_root + '/:id/destroy')
 @auth()
 def handler(id):
@@ -331,7 +344,16 @@ def handler(cid):
     return dict(obj=obj,campaign=obj.campaign,pstatuses=status_profile) if obj else bottle.redirect(
         url_root_contacts)
 
-
+@get(url_root_contacts + "/:cid/timeline/:type")
+@auth()
+def handler(cid,type):
+    if type in ["email","chat","twitter","feedback"]:
+        timeline = get_contact_timeline(cid,type)
+        if timeline:
+            print json.dumps(timeline)
+            return json.dumps(timeline)
+    else:
+        bottle.redirect(url_root_contacts+"/%s" % cid)
 @post(url_root_contacts + "/:cid")
 @auth()
 def handler(cid):
@@ -371,6 +393,7 @@ def handler(cid):
     threading.Thread(target=emails,args=(conn,contact.pemail,since)).start()
     sess = get_session()
     sess['msg'] = "Emails for %s will be fetched in a few milliseconds" % contact.pemail
+    ses['msg-old'] = False
     bottle.redirect(url_root)
 
 @get(url_root_contacts+'/:cid/tweets')
@@ -515,7 +538,4 @@ def handler(cid,id):
     current_profile.save(session=db)
     print reply.replies.topic.content
     bottle.redirect(url_root_contacts+'/%s/chats/%s/reply' % (cid,id))
-
-
-
 

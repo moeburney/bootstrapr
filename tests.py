@@ -1,14 +1,16 @@
 import json
 import pickle
 import unittest
-from model import init_db, campaign, campaign_type, ctypes, drop_all, CHAT_EMAIL, makechatfromemail, profile, chat
+from model import init_db, campaign, campaign_type, ctypes, drop_all, CHAT_EMAIL, makechatfromemail, profile, chat, get_timeline, get_data_point
 
 __author__ = 'rohan'
 
 class MyTestCase(unittest.TestCase):
     def test_something(self):
         self.assertEqual(True, True)
-
+    def test_timeline(self):
+        get_timeline(1,2)
+        get_data_point(1,2,1321170000)
     def test_campaigns(self):
         
         db = init_db()
