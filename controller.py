@@ -393,7 +393,7 @@ def handler(cid):
     threading.Thread(target=emails,args=(conn,contact.pemail,since)).start()
     sess = get_session()
     sess['msg'] = "Emails for %s will be fetched in a few milliseconds" % contact.pemail
-    ses['msg-old'] = False
+    sess['msg-old'] = False
     bottle.redirect(url_root)
 
 @get(url_root_contacts+'/:cid/tweets')
