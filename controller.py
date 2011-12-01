@@ -123,6 +123,7 @@ def handler():
         if curr_profile:
             curr_profile.t_oauth_token = urlparse.parse_qs(content)['oauth_token'][0]
             curr_profile.t_oauth_token_secret = urlparse.parse_qs(content)['oauth_token_secret'][0]
+            curr_profile.problem=""
             curr_profile.save(session=db)
         bottle.redirect(url_root)
     else:
