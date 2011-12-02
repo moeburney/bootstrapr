@@ -46,7 +46,7 @@
 
 <div class="clear"></div>
 <!-- End .clear -->
- %if !sess['msg-old']:
+ %if sess['msg-old'] == False:
 <div class="notification attention png_bg">
     <a href="#" class="close"><img src="/images/icons/cross_grey_small.png" title="Close this notification"
                                    alt="close"/></a>

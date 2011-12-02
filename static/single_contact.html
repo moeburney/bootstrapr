@@ -6,7 +6,7 @@
 <body>
 <div id="body-wrapper"> <!-- Wrapper for the radial gradient background -->
 %from model import PROFILE_OWNER
-%if profile.profile_type == PROFILE_OWNER:
+%if obj.profile_type == PROFILE_OWNER:
 %include common_sidebar current="settings",profile=profile
 %else:
 %include common_sidebar current="contacts",profile=profile
@@ -58,7 +58,7 @@
 
 <div class="clear"></div>
 <!-- End .clear -->
-%if profile.profile_type != PROFILE_OWNER:
+%if obj.profile_type != PROFILE_OWNER:
 <div class="content-box"><!-- Start Content Box -->
 
     <div class="content-box-header">
@@ -77,7 +77,6 @@
 
     <div class="content-box-content">
 
-%from model import PROFILE_OWNER
 <div id="placeholder" style="width:700px;height:300px;"></div>
 <p id="choices">Show:</p>
 <br/>
