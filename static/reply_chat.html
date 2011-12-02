@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html>
+
+%include common_head title="Reply to Chat"
+<body>
+<div id="body-wrapper"> <!-- Wrapper for the radial gradient background -->
+
+%include common_sidebar current="contacts",profile=profile
+<!-- End #sidebar -->
+
+<div id="main-content"> <!-- Main Content Section with everything -->
+
+<noscript> <!-- Show a notification if the user has disabled javascript -->
+    <div class="notification error png_bg">
+        <div>
+            Javascript is disabled or is not supported by your browser. Please <a href="http://browsehappy.com/"
+                                                                                  title="Upgrade to a better browser">upgrade</a>
+            your browser or <a href="http://www.google.com/support/bin/answer.py?answer=23852"
+                               title="Enable Javascript in your browser">enable</a> Javascript to navigate the interface
+            properly.
+        </div>
+    </div>
+</noscript>
+
+<!-- Page Head -->
+<h2>Welcome {{profile.name}}</h2>
+
+<p id="page-intro">What would you like to do?</p>
+
+ <ul class="shortcut-buttons-set"> <!-- Replace the icons URL's with your own -->
+
+        <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}"><span>
+                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
+                        Back to {{contact.name}}
+                    </span></a></li>
+
+        <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/chats/{{chat.id}}"><span>
+                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
+                        Back to Chat
+                    </span></a></li>
+     <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/emails"><span>
+                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
+                        Emails
+                    </span></a></li>
+        <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/feedbacks"><span>
+                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
+                        Feedbacks
+                    </span></a></li>
+
+
+    </ul>
+<!-- End .shortcut-buttons-set -->
+
+<div class="clear"></div>
+<!-- End .clear -->
+<!-- End .content-box -->
+
+<div class="content-box"><!-- Start Content Box -->
+
+    <div class="content-box-header">
+
+        <h3>Reply to {{contact.name}}</h3>
+
+        
+
+        <div class="clear"></div>
+
+    </div>
+    <!-- End .content-box-header -->
+
+    <div class="content-box-content">
+        %from model import chat_type
+        %import datetime
+        <hr/>
+        <h4>{{chat.profile.name}}'s message on {{datetime.datetime.fromtimestamp(chat.ts)}}</h4>
+        <p>Type : {{chat_type[chat.type]}}</p>
+        <p>Name : {{chat.profile.name}}</p>
+        <p>Message : {{chat.content}}</p>
+        %for x in chat.replies:
+        <hr/>
+        <h4>{{x.profile.name}}'s reply on {{datetime.datetime.fromtimestamp(x.ts)}}</h4>
+        <p>Message : {{x.content}} &nbsp;&nbsp; <a href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}/reply">reply</a> </p>
+        %if x.replies:
+        %for y in x.replies:
+        <h5>{{y.profile.name}}'s reply on {{datetime.datetime.fromtimestamp(y.ts)}}</h5>
+        <p>Message : {{y.content}} &nbsp;&nbsp; <a href="/campaigns/contacts/{{y.profile.id}}/chats/{{y.id}}/reply">reply</a> </p>
+        %end
+        %end
+
+        %end
+        <hr/>
+        <h3>Reply</h3>
+        <form id='cform' method="POST" action="/campaigns/contacts/{{chat.profile.id}}/chats/{{chat.id}}/reply">
+            <label for="type"/>Type: </label> <select id="type" name="type">
+            %for x in chat_type:
+            <option value="{{chat_type.index(x)}}">{{x}}</option>
+            %end
+        </select><br/><br/>
+        <textarea name="content" placeholder="your reply to the message" rows="6" cols="50"/></textarea><br/>
+            <input type='submit' value="Reply"/> <input type="reset" value="Clear"/>
+        </form>
+
+
+    </div>
+    <!-- End .content-box-content -->
+
+</div>
+<!-- End .content-box -->
+
+
+<div class="clear"></div>
+
+
+<!-- Start Notifications -->
+
+
+<!-- End Notifications -->
+
+%include common_footer

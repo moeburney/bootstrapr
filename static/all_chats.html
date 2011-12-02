@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html>
+
+%include common_head title="All Chats"
+<body>
+<div id="body-wrapper"> <!-- Wrapper for the radial gradient background -->
+
+%include common_sidebar current="contacts",profile=profile
+<!-- End #sidebar -->
+
+<div id="main-content"> <!-- Main Content Section with everything -->
+
+<noscript> <!-- Show a notification if the user has disabled javascript -->
+    <div class="notification error png_bg">
+        <div>
+            Javascript is disabled or is not supported by your browser. Please <a href="http://browsehappy.com/"
+                                                                                  title="Upgrade to a better browser">upgrade</a>
+            your browser or <a href="http://www.google.com/support/bin/answer.py?answer=23852"
+                               title="Enable Javascript in your browser">enable</a> Javascript to navigate the interface
+            properly.
+        </div>
+    </div>
+</noscript>
+
+<!-- Page Head -->
+<h2>Welcome {{profile.name}}</h2>
+
+<p id="page-intro">What would you like to do?</p>
+
+<ul class="shortcut-buttons-set"> <!-- Replace the icons URL's with your own -->
+
+    <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}"><span>
+                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
+                        Back to {{contact.name}}
+                    </span></a></li>
+
+        <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/chats/new"><span>
+                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
+                       <b> New Chat </b>
+                    </span></a></li>
+     <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/emails"><span>
+                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
+                        Emails
+                    </span></a></li>
+        <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/feedbacks"><span>
+                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
+                        Feedbacks
+                    </span></a></li>
+
+</ul>
+<!-- End .shortcut-buttons-set -->
+
+<div class="clear"></div>
+<!-- End .clear -->
+
+
+<div class="content-box"><!-- Start Content Box -->
+
+    <div class="content-box-header">
+
+        <h3>Marketing Blasts</h3>
+
+        
+
+        <div class="clear"></div>
+
+    </div>
+    <!-- End .content-box-header -->
+
+    <div class="content-box-content">
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>Contact</th>
+        <th>Time</th>
+        <th>Type of Correspondence</th>
+        <th>Content</th>
+            </tr>
+
+            </thead>
+
+            <!--	<tfoot>
+                                   <tr>
+                                       <td colspan="6">
+                                           <div class="bulk-actions align-left">
+                                               <select name="dropdown">
+                                                   <option value="option1">Choose an action...</option>
+                                                   <option value="option2">Edit</option>
+                                                   <option value="option3">Delete</option>
+                                               </select>
+                                               <a class="button" href="#">Apply to selected</a>
+                                           </div>
+
+                                           <div class="pagination">
+                                               <a href="#" title="First Page">&laquo; First</a><a href="#" title="Previous Page">&laquo; Previous</a>
+											<a href="#" class="number" title="1">1</a>
+											<a href="#" class="number" title="2">2</a>
+											<a href="#" class="number current" title="3">3</a>
+											<a href="#" class="number" title="4">4</a>
+											<a href="#" title="Next Page">Next &raquo;</a><a href="#" title="Last Page">Last &raquo;</a>
+										</div> <!-- End .pagination -->
+            <!--	<div class="clear"></div>
+                                       </td>
+                                   </tr>
+                               </tfoot> -->
+
+            <tbody>
+            %from model import chat_type,CHAT_EMAIL,CHAT_SOCIALMEDIA
+    %import datetime
+    %chatts = [x for x in items.chats if x.type not in [CHAT_EMAIL,CHAT_SOCIALMEDIA]]
+    %for x in chatts:
+    <tr>
+        <td>{{x.profile.name}}</td>
+        <td>{{datetime.datetime.fromtimestamp(x.ts)}}</td>
+        <td>{{chat_type[x.type]}}</td>
+        <td>{{x.content}}</td>
+        <td><a href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}">Edit</a> &nbsp;&nbsp; <a
+                href="/campaigns/contacts/{{x.profile.id}}/chats/{{x.id}}/reply">{{len(x.replies)}} Replies</a> </td>
+    </tr>
+    %end
+            </tbody>
+
+        </table>
+
+        <!-- End #tab1 -->
+
+
+    </div>
+    <!-- End .content-box-content -->
+
+</div>
+<!-- End .content-box -->
+
+
+<div class="clear"></div>
+
+
+<!-- Start Notifications -->
+
+
+<!-- End Notifications -->
+
+%include common_footer

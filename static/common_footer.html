@@ -1,0 +1,29 @@
+<div id="footer">
+    <small>
+        &#169; Copyright 2009 BootStrapr | Powered by <a
+            href="http://themeforest.net/item/simpla-admin-flexible-user-friendly-admin-skin/46073">Simpla Admin</a> |
+        <a href="#">Top</a>
+    </small>
+</div>
+<!-- End #footer -->
+
+</div>
+<!-- End #main-content -->
+
+</div>
+<script> $("form#cform input:submit,form#cform a,form#cform button,form#cform input:reset").button();
+function show_confirm(obj) {
+    var r = confirm("Are you sure you want to delete?");
+    if (r == true)
+        window.location = obj.attr('href');
+}
+$('.delete').click(function(event) {
+    event.preventDefault();
+    show_confirm($(this));
+
+});
+
+</script>
+</body>
+
+</html>
