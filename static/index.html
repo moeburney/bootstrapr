@@ -46,10 +46,19 @@
 				</span></a></li>
 
 
-   <!-- <li><a class="shortcut-button" href="#messages" rel="modal"><span>
+     %if not isoauth:
+    <li><a class="shortcut-button" href="/campaigns/g/start_oauth"><span>
 					<img src="/images/icons/pencil.png" alt="icon"/><br/>
-					Open Modal
-				</span></a></li> -->
+					Sync Gmail
+				</span></a></li>
+%end
+% if not istoauth:
+    <li><a class="shortcut-button" href="/campaigns/t/start_oauth"><span>
+					<img src="/images/icons/pencil.png" alt="icon"/><br/>
+					Sync Twitter
+				</span></a></li>
+%end
+
 
 </ul>
 <!-- End .shortcut-buttons-set -->

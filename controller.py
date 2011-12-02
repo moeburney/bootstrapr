@@ -446,7 +446,7 @@ def handle(cid):
         prof.feedbacks.append(obj)
         prof.save(session=db)
 
-    bottle.redirect(url_root_contacts + '/' + cid + '/feedbacks/' + str(obj.id)) if obj else bottle.redirect(
+    bottle.redirect(url_root+ '/feedbacks') if obj else bottle.redirect(
         url_root_contacts)
 @get(url_root_contacts + '/:cid/feedbacks/:id')
 @auth()
@@ -571,3 +571,15 @@ def handler(cid,id):
     print reply.replies.topic.content
     bottle.redirect(url_root_contacts+'/%s/chats/%s/reply' % (cid,id))
 
+@get(url_root+"/feedbacks/new")
+@auth()
+@view("new_custom_feedback")
+def handler():
+    sess = get_session()
+    db = init_db()
+    curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    all_campaigns =  db.query(campaign).filter(campaign.profiles.any(id=sess['uid'])).all()
+    profiles = []
+    for obj in all_campaigns:
+        profiles.extend(obj.profiles)
+    return dict(contacts=profiles,profile=curr_prof,feedback_type=FEEDBACK_TYPE,status_type=status)

@@ -35,17 +35,9 @@
                         Back to {{contact.name}}
                     </span></a></li>
 
-        <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/chats"><span>
-                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
-                        Chats
-                    </span></a></li>
      <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/getemails"><span>
                         <img src="/images/icons/pencil.png" alt="icon"/><br/>
-                        <b>Get Emails</b>
-                    </span></a></li>
-        <li><a class="shortcut-button" href="/campaigns/contacts/{{contact.id}}/feedbacks"><span>
-                        <img src="/images/icons/pencil.png" alt="icon"/><br/>
-                        Feedbacks
+                        <b>Update Emails</b>
                     </span></a></li>
 
 
@@ -54,7 +46,7 @@
 
 <div class="clear"></div>
 <!-- End .clear -->
- %if 'msg' in sess:
+ %if !sess['msg-old']:
 <div class="notification attention png_bg">
     <a href="#" class="close"><img src="/images/icons/cross_grey_small.png" title="Close this notification"
                                    alt="close"/></a>

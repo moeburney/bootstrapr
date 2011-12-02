@@ -5,8 +5,13 @@
 %include common_head title=obj.name
 <body>
 <div id="body-wrapper"> <!-- Wrapper for the radial gradient background -->
-
+%from model import PROFILE_OWNER
+%if profile.profile_type == PROFILE_OWNER:
+%include common_sidebar current="settings",profile=profile
+%else:
 %include common_sidebar current="contacts",profile=profile
+%end
+
 <!-- End #sidebar -->
 
 <div id="main-content"> <!-- Main Content Section with everything -->
@@ -53,6 +58,7 @@
 
 <div class="clear"></div>
 <!-- End .clear -->
+%if profile.profile_type != PROFILE_OWNER:
 <div class="content-box"><!-- Start Content Box -->
 
     <div class="content-box-header">
@@ -170,7 +176,7 @@ var datasets = {
 
 </div>
 <!-- End .content-box -->
-
+%end
 <div class="content-box"><!-- Start Content Box -->
 
     <div class="content-box-header">
