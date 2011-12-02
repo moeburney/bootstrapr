@@ -1,4 +1,5 @@
 import argparse
+from subprocess import call
 import threading
 import bottle
 import Properties
@@ -18,10 +19,12 @@ if("dev" in args.env):
     init_db()
     threading.Thread(target=initwork).start()
     print "### Running app in development environment"
-    bottle.run(host='localhost', port=int(args.port), app=app)
+    call("uwsgi -s 127.0.0.1:8080 -w controller --callable app -p 4 -M -t 20 --limit-as 200 -m -T ",shell=True)
+    #bottle.run(host='localhost', port=int(args.port), app=app)
 if("prod" in args.env):
     
     init_db()
     threading.Thread(target=initwork).start()
     print "### Running app in production environment"
-    bottle.run(host='localhost', port=int(args.port), app=app)
+    call("uwsgi -s 127.0.0.1:8080 -w controller --callable app  -p 4 -M -t 20 --limit-as 200 -m -T ",shell=True)
+    #bottle.run(host='localhost', port=int(args.port), app=app)
