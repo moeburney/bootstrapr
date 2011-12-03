@@ -290,7 +290,7 @@ class profile(Base):
     status = Column(Integer, default=STATUS_PROFILE_PROSPECT)
     chats = relationship("chat", back_populates="profile", cascade="all, delete-orphan",order_by="chat.ts")
     feedbacks = relationship("feedback",back_populates="profile",cascade="all,delete-orphan",order_by="feedback.ts")
-    campaign = relationship("campaign", backref="profile", secondary=link_table)
+    campaign = relationship("campaign", backref="profile", secondary=link_table,order_by="campaign.startTs")
     g_oauth_token = Column(String(55))
     g_oauth_token_secret = Column(String(55))
     t_oauth_token = Column(String(55))
@@ -299,11 +299,31 @@ class profile(Base):
     problem = Column(Text,default="")
     @hybrid_property
     def latest(self):
-        if self.chats:
-            contents = self.chats[0].content # chats are already sorted by time stamp
-            words = re.findall(r'\w+', contents)
-            if words:
-                return string.join(words[:4])
+        db = init_db()
+        latest_tweet = db.query(tweet).filter(tweet.mentioned==self.twitter).order_by(tweet.ts).first()
+        tweet_ts = 0
+        chat_ts = 0
+        if latest_tweet:
+            tweet_ts = latest_tweet.ts
+        if len(self.chats)>0:
+            chat_ts = self.chats[0].ts
+        if latest_tweet:
+            if tweet_ts > chat_ts:
+                contents = latest_tweet.text
+                words = re.findall(r'\w+', contents)
+                if words:
+                    return (string.join(words[:4]),CHAT_TWITTER)
+        if self.chats > tweet_ts:
+            if len(self.chats)>0:
+                contents = self.chats[0].content # chats are already sorted by time stamp
+                type = self.chats[0].type
+                words = re.findall(r'\w+', contents)
+                if words:
+                    if type == CHAT_EMAIL:
+                        return (string.join(words[:4]),CHAT_EMAIL)
+                    else:
+                        return (string.join(words[:4]),CHAT_PHYSICAL)
+        return ("",-1)
 
     def update(self, params, session):
         self.id = params.get('id') if 'id' in params else self.id

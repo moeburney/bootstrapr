@@ -54,8 +54,8 @@
         <form id="cform" action="/campaigns/{{item.id}}" method="POST">
             <h3>General: </h3>
             <input type=hidden id="uuid" name="uuid" value="{{item.uuid}}"/>
-            <input type="text" id="desc" name="desc" placeholder="Name of Campaign" value="{{item.desc}}" required/><br/><br/>
-            <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
+            <input type="text" id="desc" name="desc" placeholder="Name of Blast" value="{{item.desc}}" required/><br/><br/>
+            <label for="ctype">Type of Blast: </label> <select id="ctype" name="ctype">
             %if item.campaign_type is not 0:
             <option value="{{item.campaign_type}}">{{item.campaign_desc}}</option>
             %end
@@ -65,9 +65,9 @@
         </select><br>
             <br>
             %if item.goal is not None:
-            <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value="{{item.goal}}"/><br>
+            <input type=text id="goal" name="goal" placeholder="Goals of Blast" value="{{item.goal}}"/><br>
             %else:
-            <input type=text id="goal" name="goal" placeholder="Goals of Campaign" value=0/><br>
+            <input type=text id="goal" name="goal" placeholder="Goals of Blast" value=0/><br>
             %end
             <label for="datepick">Start Date: </label> <input type="text" id='datepick'><br/>
             <label for="datepick1">End Date: </label> <input type="text" id='datepick1' placeholder="End date"/>

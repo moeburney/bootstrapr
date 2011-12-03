@@ -66,12 +66,13 @@
             <tr>
                 <th>Name</th>
         <th>Acquisition channel</th>
-        <th># of correspondence</th>
+
         <th>Status</th>
-        <th>full details</th>
+        <th>Activity Timeline</th>
         <th>Latest</th>
-        <th>Feedback</th>
-        <th>Other Data</th>
+                <th># of Interactions</th>
+        <th>Interactions</th>
+                <th>Actions</th>
             </tr>
 
             </thead>
@@ -113,17 +114,27 @@
         %else:
         <td>no campaign</td>
         %end
-        <td>{{len(x.chats)}}</td>
+
         <td>{{status_profile[x.status]}}</td>
-        <td><a href="/campaigns/contacts/{{x.id}}">Details</a></td>
-        %if x.chats:
-        <td>{{x.latest}}&nbsp; <a href="/campaigns/contacts/{{x.id}}/chats">view</a></td>
-        %else:
-         <td>none&nbsp; </td>
+        <td><a href="/campaigns/contacts/{{x.id}}/showtimeline">View</a></td>
+
+        %if x.latest[1] != -1:
+        %if x.latest[1] == CHAT_TWITTER:
+        <td>{{x.latest[0]}}&nbsp; <a href="/campaigns/contacts/{{x.id}}/tweets">view</a></td>
         %end
-        <td>{{len(x.feedbacks)}} &nbsp; <a href="/campaigns/contacts/{{x.id}}/feedbacks">View all</a> </td>
+        %if x.latest[1] == CHAT_EMAIL:
+        <td>{{x.latest[0]}}&nbsp; <a href="/campaigns/contacts/{{x.id}}/emails">view</a></td>
+        %end
+        %if x.latest[1] not in [CHAT_EMAIL,CHAT_TWITTER]:
+        <td>{{x.latest[0]}}&nbsp; <a href="/campaigns/contacts/{{x.id}}/chats">view</a></td>
+        %end
+        %else:
+        <td>None</td>
+        %end
+        <td>{{len(x.chats)}}</td>
         <td><a href="/campaigns/contacts/{{x.id}}/chats">Chats</a> &nbsp; <a href="/campaigns/contacts/{{x.id}}/emails">EMAILS</a> &nbsp;
-        <a href="/campaigns/contacts/{{x.id}}/tweets">Tweets</a> </td>
+        <a href="/campaigns/contacts/{{x.id}}/tweets">Tweets</a> &nbsp; <a href="/campaigns/contacts/{{x.id}}/feedbacks">Feedbacks</a></td>
+        <td><a href="/campaigns/contacts/{{x.id}}"><img src="/images/icons/pencil.png" alt="Edit"/></a></td>
     </tr>
     %end
     %end

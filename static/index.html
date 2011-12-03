@@ -32,32 +32,21 @@
 
     <li><a class="shortcut-button" href="/campaigns/new"><span>
 					<img src="/images/icons/pencil.png" alt="icon"/><br/>
-					Create New Campaign
+					Add Blast
 				</span></a></li>
 
-    <li><a class="shortcut-button" href="/campaigns/contacts/new"><span>
+  <!--  <li><a class="shortcut-button" href="/campaigns/contacts/new"><span>
 					<img src="/images/icons/pencil.png" alt="icon"/><br/>
 					Create new Contact
-				</span></a></li>
+				</span></a></li> -->
 
-    <li><a class="shortcut-button" href="/campaigns/contacts/new?type=owner"><span>
+ <!--   <li><a class="shortcut-button" href="/campaigns/contacts/new?type=owner"><span>
 					<img src="/images/icons/pencil.png" alt="icon"/><br/>
 					Create new User
-				</span></a></li>
+				</span></a></li> -->
 
 
-     %if not isoauth:
-    <li><a class="shortcut-button" href="/campaigns/g/start_oauth"><span>
-					<img src="/images/icons/pencil.png" alt="icon"/><br/>
-					Sync Gmail
-				</span></a></li>
-%end
-% if not istoauth:
-    <li><a class="shortcut-button" href="/campaigns/t/start_oauth"><span>
-					<img src="/images/icons/pencil.png" alt="icon"/><br/>
-					Sync Twitter
-				</span></a></li>
-%end
+
 
 
 </ul>
@@ -76,103 +65,6 @@
     </div>
 </div>
 %end
-<div class="content-box"><!-- Start Content Box -->
-
-    <div class="content-box-header">
-
-        <h3>Timeline of all Marketing Blasts</h3>
-
-        <!--    <ul class="content-box-tabs">
-<li><a href="#" class="default-tab">Table</a></li> <!-- href must be unique and match the id of target div -->
-        <!--  <li><a href="#">Forms</a></li>
-       </ul> -->
-
-        <div class="clear"></div>
-
-    </div>
-    <!-- End .content-box-header -->
-
-    <div class="content-box-content">
-       
-        <div id="placeholder" style="width:700px;height:300px;"></div><br/>
-        <p id="choices">Show:</p>
-        <script type="text/javascript">
-            $(function () {
-
-                var datasets = {
-
-                }
-
-                %for x in items:
-
-                $.ajax({
-                    type: 'GET',
-                    url: '/campaigns/{{x.id}}/timeline',
-                    dataType: 'json',
-                    success: function(data) {
-                        datasets['{{x.desc}}'] = data;
-                    },
-                    data: {},
-                    async: false
-                });
-
-
-                %end
-
-
-                var i = 0;
-                $.each(datasets, function(key, val) {
-                    val.color = i;
-                    ++i;
-                });
-
-                // insert checkboxes
-                var choiceContainer = $("#choices");
-                $.each(datasets, function(key, val) {
-                    choiceContainer.append('<br/><input type="checkbox" name="' + key +
-                            '" checked="checked" id="id' + key + '">' +
-                            '<label for="id' + key + '">'
-                            + val.label + '</label>');
-                });
-                choiceContainer.find("input").click(plotAccordingToChoices);
-
-
-                function plotAccordingToChoices() {
-                    var data = [];
-
-                    choiceContainer.find("input:checked").each(function () {
-                        var key = $(this).attr("name");
-                        if (key && datasets[key])
-                            data.push(datasets[key]);
-                    });
-
-                    if (data.length > 0)
-                        $.plot($("#placeholder"), data, {
-                            xaxis: { mode: "time",autoscaleMargin:0.02 },
-                            grid: { hoverable: true, clickable: true },
-                            legend: {
-                                position: "nw",
-                                backgroundOpacity: 0.5
-
-                            },
-                            series: {
-                                lines: { show: true },
-                                points: { show: true }
-                            }
-
-                        });
-                }
-
-                plotAccordingToChoices();
-            });
-        </script>
-
-
-    </div>
-    <!-- End .content-box-content -->
-
-</div>
-<!-- End .content-box -->
 
 <div class="content-box"><!-- Start Content Box -->
 
@@ -262,6 +154,103 @@
         </table>
 
         <!-- End #tab1 -->
+
+
+    </div>
+    <!-- End .content-box-content -->
+
+</div>
+<!-- End .content-box -->
+<div class="content-box"><!-- Start Content Box -->
+
+    <div class="content-box-header">
+
+        <h3>Timeline of all Marketing Blasts</h3>
+
+        <!--    <ul class="content-box-tabs">
+<li><a href="#" class="default-tab">Table</a></li> <!-- href must be unique and match the id of target div -->
+        <!--  <li><a href="#">Forms</a></li>
+       </ul> -->
+
+        <div class="clear"></div>
+
+    </div>
+    <!-- End .content-box-header -->
+
+    <div class="content-box-content">
+
+        <div id="placeholder" style="width:700px;height:300px;"></div><br/>
+        <p id="choices">Show:</p>
+        <script type="text/javascript">
+            $(function () {
+
+                var datasets = {
+
+                }
+
+                %for x in items:
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/campaigns/{{x.id}}/timeline',
+                    dataType: 'json',
+                    success: function(data) {
+                        datasets['{{x.desc}}'] = data;
+                    },
+                    data: {},
+                    async: false
+                });
+
+
+                %end
+
+
+                var i = 0;
+                $.each(datasets, function(key, val) {
+                    val.color = i;
+                    ++i;
+                });
+
+                // insert checkboxes
+                var choiceContainer = $("#choices");
+                $.each(datasets, function(key, val) {
+                    choiceContainer.append('<br/><input type="checkbox" name="' + key +
+                            '" checked="checked" id="id' + key + '">' +
+                            '<label for="id' + key + '">'
+                            + val.label + '</label>');
+                });
+                choiceContainer.find("input").click(plotAccordingToChoices);
+
+
+                function plotAccordingToChoices() {
+                    var data = [];
+
+                    choiceContainer.find("input:checked").each(function () {
+                        var key = $(this).attr("name");
+                        if (key && datasets[key])
+                            data.push(datasets[key]);
+                    });
+
+                    if (data.length > 0)
+                        $.plot($("#placeholder"), data, {
+                            xaxis: { mode: "time",autoscaleMargin:0.02 },
+                            grid: { hoverable: true, clickable: true },
+                            legend: {
+                                position: "nw",
+                                backgroundOpacity: 0.5
+
+                            },
+                            series: {
+                                lines: { show: true },
+                                points: { show: true }
+                            }
+
+                        });
+                }
+
+                plotAccordingToChoices();
+            });
+        </script>
 
 
     </div>

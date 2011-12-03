@@ -13,7 +13,7 @@
 </div>
 <script> $("form#cform input:submit,form#cform a,form#cform button,form#cform input:reset").button();
 function show_confirm(obj) {
-    var r = confirm("Are you sure you want to delete?");
+    var r = confirm("Are you sure you want to delete? This will delete ALL CONTACTS associated with this Blast");
     if (r == true)
         window.location = obj.attr('href');
 }

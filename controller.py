@@ -1,6 +1,7 @@
 from _collections import defaultdict
 import os
 import datetime
+import string
 import threading
 import oauth2.clients.imap as imaplib
 import json
@@ -12,7 +13,7 @@ from sqlalchemy.sql.expression import and_, desc
 from bottle import route, request, get, post, view
 from Properties import TWITTER_REQUEST_TOKEN_URL, TWITTER_CALLBACK_URL, TWITTER_AUTHORIZATION_URL, TWITTER_ACCESS_TOKEN_URL, GOOGLE_REQUEST_TOKEN_URL, GOOGLE_SCOPE, GOOGLE_CALLBACK_URL, GOOGLE_AUTHORIZATION_URL, GOOGLE_ACCESS_TOKEN_URL, GOOGLE_RESOURCE_URL
 
-from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback, tweet,  TWITTER_consumer,   TWITTER_client,    GOOGLE_xoauth_displayname, GOOGLE_consumer,   GOOGLE_client, get_campaign_timeline, get_campaign_data_point, get_contact_timeline
+from model import campaign, status, expensetypes, gaintypes, campaign_type_get_all, status_profile, init_db, profile, chat, chat_type, profile_types, emails, CHAT_EMAIL, FEEDBACK_TYPE, feedback, tweet,  TWITTER_consumer,   TWITTER_client,    GOOGLE_xoauth_displayname, GOOGLE_consumer,   GOOGLE_client, get_campaign_timeline, get_campaign_data_point, get_contact_timeline, PROFILE_OWNER
 import oauth2 as oauth
 __author__ = 'rohan'
 os.chdir(os.path.dirname(__file__))
@@ -244,7 +245,19 @@ def handler(id):
     obj = db.query(campaign).filter(and_(campaign.profiles.any(id=sess['uid']),campaign.id==id)).first()
     if obj is None:
         bottle.redirect(url_root)
-    obj.delete(session=db)
+    todelete =[]
+    for p in obj.profiles:
+        print "\n\nremoving "+p.name +" from campaign "+obj.desc
+        todelete.append(p)
+    del obj.profiles
+    db.commit()
+    db.delete(obj)
+    db.commit()
+    for t in todelete:
+        if t.profile_type != PROFILE_OWNER:
+            db.delete(t)
+            db.commit()
+    
     bottle.redirect(url_root)
 
 
@@ -349,7 +362,23 @@ def handler(cid):
     obj = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    return dict(obj=obj,campaign=obj.campaign,pstatuses=status_profile,profile=curr_prof) if obj else bottle.redirect(
+    isoauth = True if (curr_prof.g_oauth_token is not None and curr_prof.g_oauth_token_secret is not None) else False
+    istoauth = True if (curr_prof.t_oauth_token is not None and curr_prof.t_oauth_token_secret is not None) else False
+    istoauth = False if curr_prof.problem != "" else istoauth
+    return dict(obj=obj,campaign=obj.campaign,pstatuses=status_profile,profile=curr_prof,isoauth=isoauth,istoauth=istoauth) if obj else bottle.redirect(
+        url_root_contacts)
+@get(url_root_contacts + "/:cid/showtimeline")
+@auth()
+@view('single_contact_timeline')
+def handler(cid):
+    db = init_db()
+    obj = db.query(profile).filter(profile.id == cid).first()
+    sess = get_session()
+    curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    isoauth = True if (curr_prof.g_oauth_token is not None and curr_prof.g_oauth_token_secret is not None) else False
+    istoauth = True if (curr_prof.t_oauth_token is not None and curr_prof.t_oauth_token_secret is not None) else False
+    istoauth = False if curr_prof.problem != "" else istoauth
+    return dict(obj=obj,campaign=obj.campaign,pstatuses=status_profile,profile=curr_prof,isoauth=isoauth,istoauth=istoauth) if obj else bottle.redirect(
         url_root_contacts)
 
 @get(url_root_contacts + "/:cid/timeline/:type")

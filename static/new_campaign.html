@@ -53,14 +53,14 @@
         %import datetime
         <form id="cform" action="/campaigns" method="POST">
     <h3>General: </h3>
-    <input type="text" id="desc" name="desc" placeholder="Name of Campaign" required/><br/><br/>
-    <label for="ctype">Type of Campaign: </label> <select id="ctype" name="ctype">
+    <input type="text" id="desc" name="desc" placeholder="Name of Blast" required/><br/><br/>
+    <label for="ctype">Type of Blast: </label> <select id="ctype" name="ctype">
     %for x in ctypes:
     <option value="{{x.id}}">{{x.desc}}</option>
     %end
 </select><br>
     <br>
-    <input type=text id="goal" name="goal" placeholder="Goals of Campaign"/><br/>
+    <input type=text id="goal" name="goal" placeholder="Goals of Blast"/><br/>
     <input type="text" id='datepick' placeholder="Start date"><br/>
     <input type="text" id='datepick1' placeholder="End date">
     <input type='hidden' id="sts" name="sts"/><br/>
@@ -99,7 +99,7 @@
     <h3>Custom Data: </h3>
     <input type=hidden id="attrs" name="attrs"/>
     <a id="addData">Add Custom Data</a><br/><br/>
-    <input type="submit" id="submit" value="Create Campaign"/> <input type="reset" value="Clear"/> <a
+    <input type="submit" id="submit" value="Create Blast"/> <input type="reset" value="Clear"/> <a
         href="/campaigns">Home</a><br/>
 </form>
 </form>
