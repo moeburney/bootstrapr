@@ -408,6 +408,7 @@ def init_db(transactional=False):
     if((session.query(campaign_type).count()) <= 0):
         for temp in ctypes:
             session.add(campaign_type(desc=temp))
+            session.commit()
     if((session.query(profile).filter(profile.name == "admin").count()) <= 0):
         obj = profile()
         obj.name = "admin"
@@ -415,7 +416,8 @@ def init_db(transactional=False):
         obj.pemail = "admin@admin.com"
         obj.profile_type = PROFILE_OWNER
         session.add(obj)
-    session.commit()
+        session.commit()
+
     
     return session
 
