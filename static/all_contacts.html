@@ -104,8 +104,7 @@
 
             <tbody>
            %from model import status_profile,PROFILE_OWNER,CHAT_TWITTER,CHAT_EMAIL
-    %for y in items:
-    %for x in y.profiles:
+    %for x in items:
     %if x.profile_type != PROFILE_OWNER:
     <tr>
         <td>{{x.name}}</td>
@@ -136,7 +135,6 @@
         <a href="/campaigns/contacts/{{x.id}}/tweets">Tweets</a> &nbsp; <a href="/campaigns/contacts/{{x.id}}/feedbacks">Feedbacks</a></td>
         <td><a href="/campaigns/contacts/{{x.id}}"><img src="/images/icons/pencil.png" alt="Edit"/></a></td>
     </tr>
-    %end
     %end
     %end
             </tbody>

@@ -104,7 +104,7 @@ class campaign(Base):
     notes = Column(String(1000))
     status = Column(Integer, default=STATUS_PENDING)
     profiles = relationship("profile", backref="campaigns",
-                            secondary=link_table,lazy="immediate")
+                            secondary=link_table)
 
     @hybrid_property
     def outgo(self):
@@ -190,7 +190,7 @@ class chat(Base):
     type = Column(Integer)
     details = Column(Text, default="{}")
     parent_chat = Column(Integer, ForeignKey(id))
-    profile = relationship("profile", back_populates="chats",lazy="immediate")
+    profile = relationship("profile", back_populates="chats")
     replies = relationship("chat", backref=backref("topic", remote_side=[id], order_by="chat.ts"))
 
     def update(self, params, session):
@@ -288,9 +288,9 @@ class profile(Base):
     pemail = Column(String(50))
     profile_type = Column(Integer, default=PROFILE_CONTACT, nullable=False)
     status = Column(Integer, default=STATUS_PROFILE_PROSPECT)
-    chats = relationship("chat", back_populates="profile", cascade="all, delete-orphan",order_by="chat.ts",lazy="subquery")
-    feedbacks = relationship("feedback",back_populates="profile",cascade="all,delete-orphan",order_by="feedback.ts",lazy="subquery")
-    campaign = relationship("campaign", backref="profile", secondary=link_table,order_by="campaign.startTs")
+    chats = relationship("chat", back_populates="profile", cascade="all, delete-orphan",order_by="chat.ts",lazy="immediate")
+    feedbacks = relationship("feedback",back_populates="profile",cascade="all,delete-orphan",order_by="feedback.ts",lazy="immediate")
+    campaign = relationship("campaign", backref="profile", secondary=link_table,order_by="campaign.startTs",lazy="immediate")
     g_oauth_token = Column(String(55))
     g_oauth_token_secret = Column(String(55))
     t_oauth_token = Column(String(55))

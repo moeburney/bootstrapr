@@ -314,7 +314,7 @@ def handler():
     db = init_db()
     objs = db.query(campaign).filter(campaign.profiles.any(id=sess['uid'])).all()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    return dict(items=objs,profile=curr_prof)
+    return dict(items=objs.profiles,profile=curr_prof)
 
 @get(url_root+"/feedbacks")
 @auth()
