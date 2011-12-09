@@ -521,7 +521,6 @@ def handler(cid, id):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(profile_id=cid, item=obj, feedback_type=FEEDBACK_TYPE,status_type=status,profile=curr_prof,contact=item)
 
 
