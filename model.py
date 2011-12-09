@@ -191,7 +191,7 @@ class chat(Base):
     details = Column(Text, default="{}")
     parent_chat = Column(Integer, ForeignKey(id))
     profile = relationship("profile", back_populates="chats")
-    replies = relationship("chat", backref=backref("topic", remote_side=[id], order_by="chat.ts"))
+    replies = relationship("chat", backref=backref("topic", remote_side=[id], order_by="chat.ts"),lazy="immediate")
 
     def update(self, params, session):
         self.id = params.get('id') if 'id' in params else self.id
