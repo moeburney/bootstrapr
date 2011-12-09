@@ -343,7 +343,8 @@ def handler():
     db = init_db()
     objs = db.query(campaign).filter(campaign.profiles.any(id=sess['uid'])).all()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    profs =[x for x in objs.profiles]
+    for camp in objs:
+        profs.append([x for x in objs.profiles])
     db.close()
     return dict(items=profs,profile=curr_prof)
 
