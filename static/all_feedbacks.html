@@ -119,8 +119,8 @@
             %items.feedbacks
             %for x in items.feedbacks:
             <tr>
-                <td>{{x.profile.name}}</td>
-                <td>{{status_profile[x.profile.profile_type]}}</td>
+                <td>{{items.name}}</td>
+                <td>{{status_profile[items.profile_type]}}</td>
                 <td>{{x.desc}}</td>
                 <td>{{FEEDBACK_TYPE[x.type]}}</td>
                 <td>{{x.action}}</td>

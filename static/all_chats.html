@@ -114,7 +114,7 @@
     %chatts = [x for x in items.chats if x.type not in [CHAT_EMAIL,CHAT_SOCIALMEDIA]]
     %for x in chatts:
     <tr>
-        <td>{{x.profile.name}}</td>
+        <td>{{items.name}}</td>
         <td>{{datetime.datetime.fromtimestamp(x.ts)}}</td>
         <td>{{chat_type[x.type]}}</td>
         <td>{{x.content}}</td>
