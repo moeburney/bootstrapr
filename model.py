@@ -104,7 +104,7 @@ class campaign(Base):
     notes = Column(String(1000))
     status = Column(Integer, default=STATUS_PENDING)
     profiles = relationship("profile", backref="campaigns",
-                            secondary=link_table,lazy='joined')
+                            secondary=link_table)
 
     @hybrid_property
     def outgo(self):
