@@ -110,7 +110,6 @@
             <tbody>
             %from model import chat_type,CHAT_EMAIL,CHAT_SOCIALMEDIA
     %import datetime
-    %items.chats
     %chatts = [x for x in items.chats if x.type not in [CHAT_EMAIL,CHAT_SOCIALMEDIA]]
     %for x in chatts:
     <tr>
