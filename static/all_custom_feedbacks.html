@@ -111,15 +111,15 @@
     %for prof in camp.profiles:
     %for x in prof.feedbacks:
     <tr>
-        <td>{{x.profile.name}}</td>
-        <td>{{status_profile[x.profile.profile_type]}}</td>
+        <td>{{prof.name}}</td>
+        <td>{{status_profile[prof.profile_type]}}</td>
         <td>{{x.desc}}</td>
         <td>{{FEEDBACK_TYPE[x.type]}}</td>
         <td>{{x.action}}</td>
         <td>{{datetime.datetime.fromtimestamp(x.ts)}}</td>
         <td>details</td>
         <td>{{status[x.status]}}</td>
-        <td><a href="/campaigns/contacts/{{x.profile.id}}/feedbacks/{{x.id}}">Edit</a> &nbsp; </td>
+        <td><a href="/campaigns/contacts/{{prof.id}}/feedbacks/{{x.id}}">Edit</a> &nbsp; </td>
     </tr>
     %end
     %end
