@@ -35,7 +35,7 @@ TWITTER_client = oauth.Client(TWITTER_consumer)
 
 engine = create_engine("mysql://rohan:gotohome@localhost/ron")
 Base = declarative_base()
-Session = sessionmaker(bind=engine)
+Session = sessionmaker(bind=engine,expire_on_commit=False)
 profile_types = ['owner', 'contact']
 status_profile = ['Prospect', 'Subscriber', 'Paid user']
 STATUS_PROFILE_PROSPECT = 0
