@@ -345,7 +345,8 @@ def handler():
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
     profs = []
     for camp in objs:
-        profs.append([x for x in camp.profiles])
+        for prof in camp.profiles:
+            profs.append(prof)
     db.close()
     return dict(items=profs,profile=curr_prof)
 
