@@ -190,7 +190,7 @@ class chat(Base):
     type = Column(Integer)
     details = Column(Text, default="{}")
     parent_chat = Column(Integer, ForeignKey(id))
-    profile = relationship("profile", back_populates="chats")
+    profile = relationship("profile", back_populates="chats",lazy="immediate")
     replies = relationship("chat", backref=backref("topic", remote_side=[id], order_by="chat.ts"))
 
     def update(self, params, session):
@@ -241,7 +241,7 @@ class feedback(Base):
     ts = Column(Float, default=time.time())
     status = Column(Integer,nullable=False,default=STATUS_PENDING)
     details = Column(Text,default="{}")
-    profile = relationship("profile", back_populates="feedbacks")
+    profile = relationship("profile", back_populates="feedbacks",lazy="immediate")
     def update(self, params, session):
         self.id = params.get('id') if 'id' in params else self.id
         self.uuid = params.get('uuid') if 'uuid' in params else self.uuid
