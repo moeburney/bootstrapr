@@ -347,6 +347,8 @@ def handler():
     for camp in objs:
         for prof in camp.profiles:
             profs.append(prof)
+    db.close()
+
     return dict(items=profs,profile=curr_prof)
 
 @get(url_root_contacts + "/new")
@@ -357,7 +359,6 @@ def handler():
     sess = get_session()
     campaigns = db.query(campaign.id,campaign.desc).filter(campaign.profiles.any(id=sess['uid'])).all()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(pstatuses=status_profile, campaigns=campaigns,type=profile_types.index(request.params.get('type') if 'type' in request.params else 'contact'),profile=curr_prof)
 
 
@@ -389,6 +390,7 @@ def handler(cid):
     isoauth = True if (curr_prof.g_oauth_token is not None and curr_prof.g_oauth_token_secret is not None) else False
     istoauth = True if (curr_prof.t_oauth_token is not None and curr_prof.t_oauth_token_secret is not None) else False
     istoauth = False if curr_prof.problem != "" else istoauth
+    db.close()
     return dict(obj=obj,campaign=obj.campaign,pstatuses=status_profile,profile=curr_prof,isoauth=isoauth,istoauth=istoauth) if obj else bottle.redirect(
         url_root_contacts)
 @get(url_root_contacts + "/:cid/showtimeline")
@@ -494,7 +496,6 @@ def handler(cid):
     sess = get_session()
     contact = db.query(profile).filter(profile.id==cid).first()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(profile_id=cid, feedback_type=FEEDBACK_TYPE,status_type=status,profile=curr_prof,contact=contact)
 @post(url_root_contacts + '/:cid/feedbacks')
 @auth()
@@ -518,7 +519,6 @@ def handler(cid, id):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(profile_id=cid, item=obj, feedback_type=FEEDBACK_TYPE,status_type=status,profile=curr_prof,contact=item)
 
 
@@ -550,7 +550,6 @@ def handler(cid):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(profile_id=cid, chat_type=chat_type,contact=item,profile=curr_prof)
 
 
@@ -575,7 +574,6 @@ def handler(cid, id):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(profile_id=cid, item=obj, chat_type=chat_type,contact=item,profile=curr_prof)
 
 
@@ -585,7 +583,6 @@ def handler(cid, id):
     db = init_db()
     obj = db.query(chat).filter(chat.id == id).first()
     obj.update(request.POST,session=db)
-    db.close()
     return bottle.redirect(url_root_contacts + '/%s/chats/%s' % (cid, id))
 
 @get(url_root_contacts+'/:cid/chats/:id/reply')
@@ -598,7 +595,6 @@ def handler(cid,id):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(chat=obj,contact=item,profile=curr_prof)
 @get(url_root_contacts+'/:cid/emails')
 @auth()
@@ -633,7 +629,6 @@ def handler(cid,id):
     current_profile.chats.append(reply)
     current_profile.save(session=db)
     print reply.replies.topic.content
-    db.close()
     bottle.redirect(url_root_contacts+'/%s/chats/%s/reply' % (cid,id))
 
 @get(url_root+"/feedbacks/new")
@@ -647,5 +642,4 @@ def handler():
     profiles = []
     for obj in all_campaigns:
         profiles.extend(obj.profiles)
-    db.close()
     return dict(contacts=profiles,profile=curr_prof,feedback_type=FEEDBACK_TYPE,status_type=status)
