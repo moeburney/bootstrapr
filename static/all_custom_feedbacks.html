@@ -107,8 +107,7 @@
             <tbody>
            %from model import FEEDBACK_TYPE,status_profile,status
     %import datetime
-    %for camp in items:
-    %for prof in camp.profiles:
+    %for prof in items:
     %for x in prof.feedbacks:
     <tr>
         <td>{{prof.name}}</td>
@@ -121,7 +120,6 @@
         <td>{{status[x.status]}}</td>
         <td><a href="/campaigns/contacts/{{prof.id}}/feedbacks/{{x.id}}">Edit</a> &nbsp; </td>
     </tr>
-    %end
     %end
     %end
             </tbody>
