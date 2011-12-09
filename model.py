@@ -290,7 +290,7 @@ class profile(Base):
     status = Column(Integer, default=STATUS_PROFILE_PROSPECT)
     chats = relationship("chat", back_populates="profile", cascade="all, delete-orphan",order_by="chat.ts",lazy="immediate")
     feedbacks = relationship("feedback",back_populates="profile",cascade="all,delete-orphan",order_by="feedback.ts",lazy="immediate")
-    campaign = relationship("campaign", backref="profile", secondary=link_table,order_by="campaign.startTs")
+    campaign = relationship("campaign", backref="profile", secondary=link_table,order_by="campaign.startTs",lazy="immediate")
     g_oauth_token = Column(String(55))
     g_oauth_token_secret = Column(String(55))
     t_oauth_token = Column(String(55))
