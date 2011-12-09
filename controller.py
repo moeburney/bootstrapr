@@ -347,7 +347,6 @@ def handler():
     for camp in objs:
         for prof in camp.profiles:
             profs.append(prof)
-    db.close()
     return dict(items=profs,profile=curr_prof)
 
 @get(url_root_contacts + "/new")
@@ -476,7 +475,6 @@ def handler(cid):
     contact_profile = db.query(profile).filter(profile.id==cid).first()
     print "Mentioned "+str(curr_prof.twitter)+" mentioner "+str(contact_profile.twitter)
     tweets = db.query(tweet).filter(and_(tweet.mentioned==curr_prof.twitter,tweet.mentioner==contact_profile.twitter)).order_by(desc(tweet.ts))
-    db.close()
     return dict(items=tweets,profile=curr_prof,contact=contact_profile)
 @get(url_root_contacts + '/:cid/feedbacks')
 @auth()
@@ -487,7 +485,6 @@ def handler(cid):
     sess = get_session()
 
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(items=item,cid=cid,profile=curr_prof)
 @get(url_root_contacts + '/:cid/feedbacks/new')
 @auth()
@@ -568,7 +565,6 @@ def handle(cid):
     if prof:
         prof.chats.append(obj)
         prof.save(session=db)
-    db.close()
     bottle.redirect(url_root_contacts + '/' + cid + '/chats/' + str(obj.id)) if obj else bottle.redirect(
         url_root_contacts)
 @get(url_root_contacts + '/:cid/chats/:id')
@@ -621,7 +617,6 @@ def handler(cid):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
-    db.close()
     return dict(chats=gtid,contact=item,profile=curr_prof,sess=sess)
 
 @post(url_root_contacts+'/:cid/chats/:id/reply')
