@@ -628,7 +628,6 @@ def handler(cid,id):
     reply.save(session=db)
     current_profile.chats.append(reply)
     current_profile.save(session=db)
-    print reply.replies.topic.content
     bottle.redirect(url_root_contacts+'/%s/chats/%s/reply' % (cid,id))
 
 @get(url_root+"/feedbacks/new")
