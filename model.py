@@ -33,7 +33,7 @@ TWITTER_consumer = oauth.Consumer(TWITTER_CONSUMER_KEY,TWITTER_CONSUMER_SECRET)
 TWITTER_client = oauth.Client(TWITTER_consumer)
 
 
-engine = create_engine("mysql://rohan:gotohome@localhost/ron",pool_recycle=3600,pool_size=20)
+engine = create_engine("mysql://rohan:gotohome@localhost/ron",pool_recycle=True)
 Base = declarative_base()
 Session = sessionmaker(bind=engine,expire_on_commit=False)
 profile_types = ['owner', 'contact']
@@ -140,6 +140,7 @@ class campaign(Base):
         for obj in db.query(campaign.uuid, campaign.roi).all():
             roidict[obj.uuid] = obj.roi
         ranked = sorted(roidict, key=lambda obj:obj.roi)
+        db.close()
         return ranked.index(self.uuid)
 
 
@@ -167,6 +168,7 @@ class campaign(Base):
         db = session
         db.add(self)
         db.commit()
+
 
     def delete(self, session):
         db = session
@@ -312,6 +314,7 @@ class profile(Base):
                 contents = latest_tweet.text
                 words = re.findall(r'\w+', contents)
                 if words:
+                    db.close()
                     return (string.join(words[:4]),CHAT_TWITTER)
         if self.chats > tweet_ts:
             if len(self.chats)>0:
@@ -320,9 +323,12 @@ class profile(Base):
                 words = re.findall(r'\w+', contents)
                 if words:
                     if type == CHAT_EMAIL:
+                        db.close()
                         return (string.join(words[:4]),CHAT_EMAIL)
                     else:
+                        db.close()
                         return (string.join(words[:4]),CHAT_PHYSICAL)
+        db.close()
         return ("",-1)
 
     def update(self, params, session):
@@ -465,6 +471,7 @@ def emails(conn, email, since="1970/01/01"):
         currchat.save(session=db)
         contact.chats.append(currchat)
         contact.save(session=db)
+        db.close()
     return
 
 
@@ -584,6 +591,7 @@ def get_contact_timeline(id,type):
     temp['data'] = temp1.items()
     temp['data'].sort()
     print temp
+    db.close()
     return temp
 
 def get_campaign_timeline(id,uid):
@@ -605,6 +613,7 @@ def get_campaign_timeline(id,uid):
         temp['data'] = temp1.items()
     temp['data'].sort()
     print temp
+    db.close()
     return temp
 
 def get_campaign_data_point(id,uid,ts):
@@ -641,6 +650,7 @@ def get_campaign_data_point(id,uid,ts):
             data[prof.name] = temp
     print data
     print json.dumps(data)
+    db.close()
     return data
     
 def get_mentions(api,since=None):

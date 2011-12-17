@@ -359,6 +359,7 @@ def handler():
     sess = get_session()
     campaigns = db.query(campaign.id,campaign.desc).filter(campaign.profiles.any(id=sess['uid'])).all()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(pstatuses=status_profile, campaigns=campaigns,type=profile_types.index(request.params.get('type') if 'type' in request.params else 'contact'),profile=curr_prof)
 
 
@@ -476,7 +477,9 @@ def handler(cid):
 
     contact_profile = db.query(profile).filter(profile.id==cid).first()
     print "Mentioned "+str(curr_prof.twitter)+" mentioner "+str(contact_profile.twitter)
+
     tweets = db.query(tweet).filter(and_(tweet.mentioned==curr_prof.twitter,tweet.mentioner==contact_profile.twitter)).order_by(desc(tweet.ts))
+    db.close()
     return dict(items=tweets,profile=curr_prof,contact=contact_profile)
 @get(url_root_contacts + '/:cid/feedbacks')
 @auth()
@@ -487,6 +490,7 @@ def handler(cid):
     sess = get_session()
 
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(items=item,cid=cid,profile=curr_prof)
 @get(url_root_contacts + '/:cid/feedbacks/new')
 @auth()
@@ -496,6 +500,7 @@ def handler(cid):
     sess = get_session()
     contact = db.query(profile).filter(profile.id==cid).first()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(profile_id=cid, feedback_type=FEEDBACK_TYPE,status_type=status,profile=curr_prof,contact=contact)
 @post(url_root_contacts + '/:cid/feedbacks')
 @auth()
@@ -519,6 +524,7 @@ def handler(cid, id):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(profile_id=cid, item=obj, feedback_type=FEEDBACK_TYPE,status_type=status,profile=curr_prof,contact=item)
 
 
@@ -539,6 +545,7 @@ def handler(cid):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(items=item,cid=cid,profile=curr_prof,contact=item)
 
 
@@ -550,6 +557,7 @@ def handler(cid):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(profile_id=cid, chat_type=chat_type,contact=item,profile=curr_prof)
 
 
@@ -563,6 +571,7 @@ def handle(cid):
     if prof:
         prof.chats.append(obj)
         prof.save(session=db)
+    db.close()
     bottle.redirect(url_root_contacts + '/' + cid + '/chats/' + str(obj.id)) if obj else bottle.redirect(
         url_root_contacts)
 @get(url_root_contacts + '/:cid/chats/:id')
@@ -574,6 +583,7 @@ def handler(cid, id):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(profile_id=cid, item=obj, chat_type=chat_type,contact=item,profile=curr_prof)
 
 
@@ -583,6 +593,7 @@ def handler(cid, id):
     db = init_db()
     obj = db.query(chat).filter(chat.id == id).first()
     obj.update(request.POST,session=db)
+    db.close()
     return bottle.redirect(url_root_contacts + '/%s/chats/%s' % (cid, id))
 
 @get(url_root_contacts+'/:cid/chats/:id/reply')
@@ -595,6 +606,7 @@ def handler(cid,id):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(chat=obj,contact=item,profile=curr_prof)
 @get(url_root_contacts+'/:cid/emails')
 @auth()
@@ -612,6 +624,7 @@ def handler(cid):
     item = db.query(profile).filter(profile.id == cid).first()
     sess = get_session()
     curr_prof = db.query(profile).filter(profile.id==sess['uid']).first()
+    db.close()
     return dict(chats=gtid,contact=item,profile=curr_prof,sess=sess)
 
 @post(url_root_contacts+'/:cid/chats/:id/reply')
@@ -628,6 +641,7 @@ def handler(cid,id):
     reply.save(session=db)
     current_profile.chats.append(reply)
     current_profile.save(session=db)
+    db.close()
     bottle.redirect(url_root_contacts+'/%s/chats/%s/reply' % (cid,id))
 
 @get(url_root+"/feedbacks/new")
@@ -641,4 +655,5 @@ def handler():
     profiles = []
     for obj in all_campaigns:
         profiles.extend(obj.profiles)
+    db.close()
     return dict(contacts=profiles,profile=curr_prof,feedback_type=FEEDBACK_TYPE,status_type=status)
