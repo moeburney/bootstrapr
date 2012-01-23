@@ -287,7 +287,11 @@ class profile(Base):
     uuid = Column(String(100), default=uuid.uuid4().__str__())
     name = Column(String(200), default="New Profile")
     passwd = Column(String(20), default=None)
-    pemail = Column(String(50))
+    pemail = Column(String(50),default="none@email.com")
+    website = Column(String(Text),default="www.example.com")
+    notes = Column(String(Text),default="notes")
+    source = Column(String(Text),default="source")
+    community = Column(String(Text),default="community")
     profile_type = Column(Integer, default=PROFILE_CONTACT, nullable=False)
     status = Column(Integer, default=STATUS_PROFILE_PROSPECT)
     chats = relationship("chat", back_populates="profile", cascade="all, delete-orphan",order_by="chat.ts",lazy='immediate')
@@ -340,6 +344,10 @@ class profile(Base):
         self.profile_type = params.get('ptype') if 'ptype' in params else self.profile_type
         self.status = params.get('pstatus') if 'pstatus' in params else self.status
         self.twitter = params.get('twitter') if 'twitter' in params else self.twitter
+        self.website = params.get('website') if 'website' in params else self.website
+        self.notes = params.get('notes') if 'notes' in params else self.notes
+        self.source = params.get('source') if 'source' in params else self.source
+        self.community = params.get('community') if 'community' in params else self.community
         db = session
         db.add(self)
         db.commit()

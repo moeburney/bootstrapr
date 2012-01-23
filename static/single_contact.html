@@ -97,8 +97,14 @@
             %if obj.profile_type == PROFILE_OWNER:
             <input type="password" id='passwd' name="passwd" placeholder="Password" required value="{{obj.passwd}}" /><br/>
             %end
-            <input type="email" id="pemail" name="pemail" placeholder="Email" required value="{{obj.pemail}}"/><br/>
+            <input type="email" id="pemail" name="pemail" placeholder="Email" value="{{obj.pemail}}"/><br/>
+            <input type="url" id="website" name="website" placeholder="website" value="{{obj.website}}"/><br/>
+            <input type="text" id="source" name="source" placeholder="source" value="{{obj.source}}"/><br/>
+            <input type="text" id="community" name="community" placeholder="community" value="{{obj.community}}"/><br/>
+
             <input type="text" id="twitter" name="twitter" placeholder="Twitter Handle"  value="{{obj.twitter}}" /><br/>
+            <textarea name="notes" placeholder="Notes about the Contact" rows="6" cols="50"/>{{obj.notes}}</textarea><br/>
+
             %if not (obj.profile_type == PROFILE_OWNER):
             <label for="campaign_id"/>Marketing Blast: </label>{{campaign[0].desc}}<br/><br/>
             <label for="pstatus"/>Type: </label><select id="pstatus" name="pstatus">

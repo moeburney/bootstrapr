@@ -55,10 +55,10 @@
         <form action="/campaigns/contacts" method="POST">
             %if not campaigns and type != PROFILE_OWNER:
             <script type="text/javascript">
-            <!--
+
             alert("No Blasts created by user -- redirecting")
             window.location.href = "/campaigns";
-//-->
+
             </script>
             %end
             %if type == PROFILE_OWNER:
@@ -68,9 +68,14 @@
             %if type == PROFILE_OWNER:
             <input type="password" id='passwd' name="passwd" placeholder="Enter Password" required/><br/>
             %end
-            <input type="email" id="pemail" name="pemail" placeholder="Email" required/><br/>
+            <input type="email" id="pemail" name="pemail" placeholder="Email" /><br/>
+            <input type="url" id="website" name="website" placeholder="website" /><br/>
+            <input type="text" id="source" name="source" placeholder="source" /><br/>
+            <input type="text" id="community" name="community" placeholder="community" /><br/>
             <input type='hidden' id='ptype' name="ptype" value="{{type}}"/>
             <input type="text" id="twitter" name="twitter"  placeholder="Twitter Handle"/><br/>
+            <textarea name="notes" placeholder="Notes about the Contact" rows="6" cols="50"/></textarea><br/>
+
             %if not (type == PROFILE_OWNER):
             <label for="campaign_id"/>Came From Marketing Blast: </label><select id="campaign_id" name="campaign_id">
             %for x in campaigns:
